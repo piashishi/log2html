@@ -1,0 +1,70 @@
+<html><head>
+	<script src="https://sverweij.github.io/mscgen_js/mscgen-inpage.js" defer>
+</script>
+Test
+</head><body>
+Body
+<pre class="mscgen_js">
+msc {
+    a [label="consumer"], b [label="shopfront"], c,d[label="trace_proxy"], e[label="trace_ctrl"];
+
+    a =>> b [label="buy (commestible)"];
+    b =>> c [label="lookup_price(commestible)"];
+    c >> b [label="price"];
+    b =>> a [label=""];
+    a =>> b [label="money"];
+    d =>> e [label="TRACE_INFO_LOG__CX__YY_ZZ_UU_REQ"];
+    e =>> d [label="TRACE_INFO_LOG_RESPONSE"];
+    ...;
+}
+</pre>
+
+<mscgen>
+msc {
+   Co, Mo, Dolores;
+   Co =>> Mo
+       [label="Hello"];
+   Dolores =>> Co
+       [label="Is it me you're looking for?"];
+   Mo =>> Dolores
+       [label="I see it in your eyes"];
+}
+</mscgen>
+
+<mscgen>
+msc {
+   Co, Mo, Dolores;
+   Co =>> Mo
+       [label="Hello"];
+   Dolores =>> Co
+       [label="Is it me you're looking for?"];
+   Mo =>> Dolores
+       [label="I see it in your eyes"];
+}
+</mscgen>
+
+<mscgen>
+msc {
+   Co, Mo, Dolores;
+   Co =>> Mo
+       [label="Hello"];
+   Dolores =>> Co
+       [label="Is it me you're looking for?"];
+   Mo =>> Dolores
+       [label="I see it in your eyes"];
+}
+</mscgen>
+
+<mscgen>
+msc {
+   Co, Mo, Dolores;
+   Co =>> Mo
+       [label="Hello"];
+   Dolores =>> Co
+       [label="Is it me you're looking for?"];
+   Mo =>> Dolores
+       [label="I see it in your eyes"];
+}
+</mscgen>
+
+</body></html>

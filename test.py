@@ -39,7 +39,7 @@ fp = open("raw.log", "r");
 for line in fp.readlines():
     matchObj =  re.search("LIBMSG: MMON", line)
     if matchObj:     
-        tmpArr = re.split(r' ', line);
+        tmpArr = re.split(r' *', line);
         arr2 = re.split(r";", tmpArr[8])    #tmpArr[8] is LIB MSG information
         if arr2[2] != "1/1": #no fragment
             continue

@@ -1,4 +1,5 @@
 #!/usr/bin/python 
+
 import re
 import os
 
@@ -15,13 +16,17 @@ process_pair = [["TRACE_CTRL", "TRACE_PROXY"], ["TRACE_PROXY", "SC"]]
 def getNodeName(node, num):
     if node == 0:    #0 mean AS_NODE
         return private_data.as_map[num]
-    if node == 2:    #2 mean CLA NODE
+    elif node == 2:    #2 mean CLA NODE
         return private_data.cla_map[num]
-    if node == 4:      #4 SAB
+    elif node == 4:      #4 SAB
         return private_data.sab_map[num]
+    else:
+        return "UNKNOWN"
     
+#the server name actually is RG's name, so did not know which active node will be send
+#so set the server name as unknown, it will be assign after analysis IPC_IN message.  
 def getServerName(server, num):
-    return "CLA?"
+    return "CLA-Unknown"
 
 def getNGName(node, node_num, server, ser_num):
     if node == 0xff:
@@ -34,10 +39,6 @@ class messageItem:
         self.timestamp = timestamp
         self.msgType = msgType
         self.msgData = msgData
-        self.isReceived = False
-        
-    def setMsgReceived(self):
-        self.isReceived = True
     
 #processMessageList, store out messages for one process pair
 class processPairMessageList:
@@ -50,13 +51,14 @@ class processPairMessageList:
         self.srcNode = srcNode
         self.dstNode = dstNode
         self.outMsg = []
+        
     def appendOutMsg(self, data):
         self.outMsg.append(data)
-  
-def FindMessageItem(src, srcInstance, dst, dstInstance, senderPid):
+    
+def FindMessageItem(srcNode, src, srcInstance, dstNode, dst, dstInstance, senderPid):
     for tmp in ALLProcessPairMessagesArray:
-        if tmp.src ==src and tmp.dst == dst and tmp.srcInstance == srcInstance \
-        and tmp.dstInstance ==dstInstance and tmp.srcPid == senderPid:
+        if tmp.srcNode == srcNode and tmp.src ==src and tmp.dst == dst and tmp.srcInstance == srcInstance \
+        and tmp.dstNode == dstNode and tmp.dstInstance ==dstInstance and tmp.srcPid == senderPid:
             return tmp
     return None
 
@@ -69,8 +71,19 @@ def isNeedTrace(src, dst):
         if (pair[0] == src and pair[1] == dst) or (pair[0] == dst and pair[1] == src):
             return True
     return False
-            
+
+def checkPlatform(filename):
+    matchObj = re.search(r"CLA", logFile)
+    if matchObj:
+        return "LittleEndian"
+    matchObj = re.search(r"AS", logFile);
+    if matchObj:
+        return "BigEndian"
+    return "BigEndian"
+    
+          
 def collectMsg(fileName, direction):            
+    platform = checkPlatform(fileName)
     fp = open(fileName, "r");
     for line in fp.readlines():
         msgLine = re.search("LIBMSG: MMON", line)
@@ -94,40 +107,52 @@ def collectMsg(fileName, direction):
                 dstProcess = private_data.process_map[int(msgData[28], 16)]
                 dstInstance = int(msgData[29], 16)
                 dstNode = getNGName(int(msgData[30], 16), int(msgData[31], 16), int(msgData[32], 16), int(msgData[33], 16))
-                srcPid = int(msgData[36] + msgData[35], 16) 
+
+                if msgDirection == "IPC_OUT":
+                    if platform == "LittleEndian":
+                        srcPid = int(msgData[36] + msgData[35], 16) 
+                    else:
+                        srcPid = int(msgData[35] + msgData[36], 16)
+                else:
+                    if platform == "LittleEndian" and srcNode != dstNode:   #CLA node and message from different node.
+                        srcPid = int(msgData[35] + msgData[36], 16)
             
                 if not isNeedTrace(srcProcess, dstProcess):
                     continue;
-         
+                item = FindMessageItem(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                 if msgDirection == direction and direction == "IPC_OUT":
-                    item = FindMessageItem(srcProcess, srcInstance, dstProcess, dstInstance, srcPid)
                     if not item:
                         item = processPairMessageList(srcNode, srcProcess, srcInstance, \
                                         dstNode, dstProcess, dstInstance, srcPid)
                         ALLProcessPairMessagesArray.append(item)
-                    item.appendOutMsg(msgData)
-                if msgDirection == direction and direction == "IPC_IN":
-                    print "IN"
+                    message = messageItem("12345555", "TRACE_TYPE_INFO_LOG", msgData)
+                    item.appendOutMsg(message)
+                elif msgDirection == direction and direction == "IPC_IN":
+                    if item and item.dstNode == "CLA-Unknown":
+                        realDestNode = tmpArr[4]
+                        item.dstNode = realDestNode
+                        
                 
     fp.close()
 
-for root,dirs,files in os.walk(r'./'):
+for root,dirs,files in os.walk(r'log'):
     for logFile in files:
         matchObj = re.search(r"log$", logFile)    
         if matchObj:
-            collectMsg(logFile, "IPC_OUT")
+            collectMsg('log/'+ logFile, "IPC_OUT")
 
-for root,dirs,files in os.walk(r'./'):
+#parse IPC_IN message used to set DST node name   
+for root,dirs,files in os.walk(r'log'):
     for logFile in files:
         matchObj = re.search(r"log$", logFile)    
         if matchObj:
-            collectMsg(logFile, "IPC_IN")
-         
+            collectMsg('log/'+ logFile, "IPC_IN")
+
+             
 for tmp in ALLProcessPairMessagesArray:
     print tmp.srcNode+"/"+tmp.src+"_"+str(tmp.srcInstance)+"["+str(tmp.srcPid)+"]"+"------->"+tmp.dstNode+ \
-    "/"+tmp.dst+"_"+str(tmp.dstInstance)
-    for tmp2 in tmp.outMsg:
-        print tmp2
-    
+    "/"+tmp.dst+"_"+str(tmp.dstInstance) + "(" + str(len(tmp.outMsg)) +")"
+#     for tmp2 in tmp.outMsg:
+#             print tmp2.msgData
 
             

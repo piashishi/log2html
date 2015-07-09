@@ -51,6 +51,7 @@ class processPairMessageList:
         self.srcNode = srcNode
         self.dstNode = dstNode
         self.outMsg = []
+        self.dstPid = 0
         
     def appendOutMsg(self, data):
         self.outMsg.append(data)
@@ -72,67 +73,73 @@ def isNeedTrace(src, dst):
             return True
     return False
 
-def checkPlatform(filename):
-    matchObj = re.search(r"CLA", logFile)
-    if matchObj:
-        return "LittleEndian"
-    matchObj = re.search(r"AS", logFile);
-    if matchObj:
-        return "BigEndian"
-    return "BigEndian"
+
+def getPid(platform, lowByte, highByte):
+    pid = 0
+    if platform == "LittleEndian":
+        pid = int(highByte + lowByte, 16) 
+    else:
+        pid = int(lowByte + highByte, 16)
+    return pid
+
     
-          
+
+testline = "Jun 18 08:24:53.469097 debug AS7-0 trace_proxy[4618]: [0]: LIBMSG: MMON;28078;1/1;IPC_IN;2D00_000A_FFFF_120A<0800_0201_0400_1724;290979;0; 00 03 00 00 00 00 27 0f 00 00 27 0f 00 00 27 0f 00 00 27 0f 0b 09 08 00 02 01 04 00 2d 00 00 0a ff ff 00 17 24 27 00 00 00 00 81 42 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (libmsg_msgmon.c:306) //146136"        
+
+def parseLine(line, direction):
+    msgLine = re.search("LIBMSG: MMON", line)
+    if msgLine:     
+        tmpArr = re.split(r' +', line);
+        msgInfo = re.split(r";", tmpArr[8])  # tmpArr[8] is LIB MSG information
+        fragmentFlag = msgInfo[2]  # get fragment flag
+        msgDirection = msgInfo[3]  # get msg direction
+           
+        matchObj = re.search(r'([0-9A-Fa-f]{2} ){2,}', line);
+        if matchObj:
+            msgData = re.split(r' ', matchObj.group())
+                
+            if fragmentFlag != "1/1":
+                appendFragmentMsg(msgData)
+                return
+            
+            srcProcess = private_data.process_map[int(msgData[22], 16)]
+            srcInstance = int(msgData[23], 16)
+            srcNode = getNGName(int(msgData[24], 16), int(msgData[25], 16), int(msgData[26], 16), int(msgData[27], 16))
+            dstProcess = private_data.process_map[int(msgData[28], 16)]
+            dstInstance = int(msgData[29], 16)
+            dstNode = getNGName(int(msgData[30], 16), int(msgData[31], 16), int(msgData[32], 16), int(msgData[33], 16))
+
+            srcPid = 0
+            if "CLA" in srcNode:
+                platform = "LittleEndian"
+            else:
+                platform = "BigEndian"
+            srcPid = getPid(platform, msgData[35], msgData[36])
+            
+            
+            if not isNeedTrace(srcProcess, dstProcess):
+                return
+
+            item = FindMessageItem(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
+            if msgDirection == direction and direction == "IPC_OUT":
+                if not item:
+                    item = processPairMessageList(srcNode, srcProcess, srcInstance, \
+                                        dstNode, dstProcess, dstInstance, srcPid)
+                    ALLProcessPairMessagesArray.append(item)
+                message = messageItem("12345555", "TRACE_TYPE_INFO_LOG", msgData)
+                item.appendOutMsg(message)
+            elif msgDirection == direction and direction == "IPC_IN":
+                if item and item.dstNode == "CLA-Unknown":
+                    realDestNode = tmpArr[4]
+                    item.dstNode = realDestNode
+                if item and item.dstPid == 0 :
+                    item.dstPid = re.findall(r'\[(\d+)\]', tmpArr[5])[0]  # tmpArr[5] is such as "Session_Ctrl_1[1111]:
+
+
 def collectMsg(fileName, direction):            
-    platform = checkPlatform(fileName)
     fp = open(fileName, "r");
     for line in fp.readlines():
-        msgLine = re.search("LIBMSG: MMON", line)
-        if msgLine:     
-            tmpArr = re.split(r' +', line);
-            msgInfo = re.split(r";", tmpArr[8])  # tmpArr[8] is LIB MSG information
-            fragmentFlag = msgInfo[2]  # get fragment flag
-            msgDirection = msgInfo[3]  # get msg direction
-           
-            matchObj = re.search(r'([0-9A-Fa-f]{2} ){2,}', line);
-            if matchObj:
-                msgData = re.split(r' ', matchObj.group())
-                
-                if fragmentFlag != "1/1":
-                    appendFragmentMsg(msgData)
-                    continue
-
-                srcProcess = private_data.process_map[int(msgData[22], 16)]
-                srcInstance = int(msgData[23], 16)
-                srcNode = getNGName(int(msgData[24], 16), int(msgData[25], 16), int(msgData[26], 16), int(msgData[27], 16))
-                dstProcess = private_data.process_map[int(msgData[28], 16)]
-                dstInstance = int(msgData[29], 16)
-                dstNode = getNGName(int(msgData[30], 16), int(msgData[31], 16), int(msgData[32], 16), int(msgData[33], 16))
-
-                if msgDirection == "IPC_OUT":
-                    if platform == "LittleEndian":
-                        srcPid = int(msgData[36] + msgData[35], 16) 
-                    else:
-                        srcPid = int(msgData[35] + msgData[36], 16)
-                else:
-                    if platform == "LittleEndian" and srcNode != dstNode:   #CLA node and message from different node.
-                        srcPid = int(msgData[35] + msgData[36], 16)
-            
-                if not isNeedTrace(srcProcess, dstProcess):
-                    continue;
-                item = FindMessageItem(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
-                if msgDirection == direction and direction == "IPC_OUT":
-                    if not item:
-                        item = processPairMessageList(srcNode, srcProcess, srcInstance, \
-                                        dstNode, dstProcess, dstInstance, srcPid)
-                        ALLProcessPairMessagesArray.append(item)
-                    message = messageItem("12345555", "TRACE_TYPE_INFO_LOG", msgData)
-                    item.appendOutMsg(message)
-                elif msgDirection == direction and direction == "IPC_IN":
-                    if item and item.dstNode == "CLA-Unknown":
-                        realDestNode = tmpArr[4]
-                        item.dstNode = realDestNode
-                        
-                
+        parseLine(line, direction)
     fp.close()
 
 for root,dirs,files in os.walk(r'log'):
@@ -147,12 +154,5 @@ for root,dirs,files in os.walk(r'log'):
         matchObj = re.search(r"log$", logFile)    
         if matchObj:
             collectMsg('log/'+ logFile, "IPC_IN")
-
-             
-for tmp in ALLProcessPairMessagesArray:
-    print tmp.srcNode+"/"+tmp.src+"_"+str(tmp.srcInstance)+"["+str(tmp.srcPid)+"]"+"------->"+tmp.dstNode+ \
-    "/"+tmp.dst+"_"+str(tmp.dstInstance) + "(" + str(len(tmp.outMsg)) +")"
-#     for tmp2 in tmp.outMsg:
-#             print tmp2.msgData
 
             

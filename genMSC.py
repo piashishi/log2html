@@ -1,9 +1,11 @@
 #!/usr/bin/python 
 
-import test
+import parseLog
 
 ALLMSG = []
 MSGLable = {}
+MSCContent = ""
+
 class MSCItem:
     def __init__(self, msgPair, msgItem):
         self.src = msgPair.srcNode+"/"+msgPair.src+"_"+str(msgPair.srcInstance)+"["+str(msgPair.srcPid)+"]"
@@ -14,18 +16,18 @@ class MSCItem:
         self.dstLabel = ""
         self.sameMsgCounter = 1
 
-# sortProcessLabel  = {}    
-# 
-# def sortLabel():
-#     for process in test.process_pair:
-#         if not process[0] in sortProcessLabel.keys():
-#             sortProcessLabel
-#         if not process[1] in sortProcessLabel.keys:
-#             sortProcessLabel.append(process)
+sortProcessLabel  = []  
+ 
+def sortLabel():
+    for process in parseLog.process_pair:
+        if not process[0] in sortProcessLabel: 
+            sortProcessLabel.append(process[0])
+        if not process[1] in sortProcessLabel:
+            sortProcessLabel.append(process[1])
                   
 def genMSCLabel():
     index = 0
-    for pair in test.ALLProcessPairMessagesArray:
+    for pair in parseLog.ALLProcessPairMessagesArray:
         for data in pair.outMsg:
             msg = MSCItem(pair, data)
             if not MSGLable.has_key(msg.src):
@@ -37,20 +39,31 @@ def genMSCLabel():
             msg.srcLabel = MSGLable[msg.src]
             msg.dstLabel = MSGLable[msg.dst]
             ALLMSG.append(msg)
+    sortLabel()
 
 def printMSCLabel():
-    index = 1
+    global MSCContent
     maxSize = len(MSGLable)
-    for key in MSGLable.keys():
-        value = MSGLable[key]
-        print value + " [ label = \"" + key + "\" ]",
-        if index == maxSize:
-            print ";"
-        else:
-            print ",",
-        index += 1
+    index = 1
+    for processLabel in sortProcessLabel:
+        tmpArr = []
+        for key in MSGLable.keys():
+            if processLabel in key:
+                value = MSGLable[key]
+                pair =(key, value)
+                tmpArr.append(pair)
+        tmpArr.sort()
+        for pair in tmpArr:
+            if index == maxSize:
+                Label = pair[1] + " [ label = \"" + pair[0] + "\" ]" + ";" + "\n"
+            else:
+                Label = pair[1] + " [ label = \"" + pair[0] + "\" ]" + ","
+            MSCContent += Label
+            index += 1
+
         
 def printMSCContent():
+    global MSCContent
     index = 0
     prevMsg = ALLMSG[0]
     for msg in ALLMSG:
@@ -59,21 +72,32 @@ def printMSCContent():
                 prevMsg.sameMsgCounter += 1
         else:
             if prevMsg.sameMsgCounter != 1:
-                print prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+prevMsg.msgType +"("+str(prevMsg.sameMsgCounter)+")"+"\"];"
+                content =  prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+ \
+                    prevMsg.msgType +"("+str(prevMsg.sameMsgCounter)+")"+"\"];" + "\n"
             else:
-                print prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+prevMsg.msgType + "\"];"
+                content =  prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+prevMsg.msgType + "\"];" + "\n"
+            MSCContent += content
             prevMsg = msg
         index += 1
         
 def printMSCHeader():
-    print "msc {"
+    global MSCContent
+    MSCContent += "<mscgen>\n"
+    MSCContent += "msc {\n"
     #print "hscale = \"2\";"
     
 def printMSCEnd():
-    print "}"
+    global MSCContent
+    MSCContent += "}\n"
+    MSCContent += "</mscgen>\n"
     
-genMSCLabel()
-printMSCHeader()
-printMSCLabel()
-printMSCContent()
-printMSCEnd()
+
+def genMSC():
+    genMSCLabel()
+    printMSCHeader()
+    printMSCLabel()
+    printMSCContent()
+    printMSCEnd()
+    return MSCContent
+    
+genMSC()

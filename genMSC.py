@@ -100,4 +100,4 @@ def genMSC():
     printMSCEnd()
     return MSCContent
     
-genMSC()
+print genMSC()

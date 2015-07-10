@@ -2,7 +2,25 @@
 
 import parseLog
 
+
+# the msc format is like that:
+# msc {
+# 
+#  a [label="Client"],b [label="Server"];
+# 
+#  a=>b [label="data1"];
+#  a-xb [label="data2"];
+#  a=>b [label="data3"];
+#  a<=b [label="ack1, nack2"];
+#  a=>b [label="data2", arcskip="1"];
+#  |||;
+#  a<=b [label="ack3"];
+#  |||;
+# }
+
 ALLMSG = []
+#MSGLable is a dictionary, key is label name, like "AS10-0/SC_1[1111]" ,value is a alias of key.
+#because MSC can't support the label name, so need use alias.
 MSGLable = {}
 MSCContent = ""
 
@@ -16,18 +34,22 @@ class MSCItem:
         self.dstLabel = ""
         self.sameMsgCounter = 1
 
-sortProcessLabel  = []  
+sortedProcessLabel  = []  
  
-def sortLabel():
-    for process in parseLog.process_pair:
-        if not process[0] in sortProcessLabel: 
-            sortProcessLabel.append(process[0])
-        if not process[1] in sortProcessLabel:
-            sortProcessLabel.append(process[1])
-                  
+#sort label by process pair.
+def sortProcessLabel():
+    for process in parseLog.processPairNeedProcess:
+        if not process[0] in sortedProcessLabel: 
+            sortedProcessLabel.append(process[0])
+        if not process[1] in sortedProcessLabel:
+            sortedProcessLabel.append(process[1])
+            
+#the function will do:
+#1: generate   MSCItem 
+#2: generate    MSGLable
 def genMSCLabel():
     index = 0
-    for pair in parseLog.ALLProcessPairMessagesArray:
+    for pair in parseLog.processPairArray:
         for data in pair.outMsg:
             msg = MSCItem(pair, data)
             if not MSGLable.has_key(msg.src):
@@ -39,13 +61,13 @@ def genMSCLabel():
             msg.srcLabel = MSGLable[msg.src]
             msg.dstLabel = MSGLable[msg.dst]
             ALLMSG.append(msg)
-    sortLabel()
+    sortProcessLabel()
 
 def printMSCLabel():
     global MSCContent
     maxSize = len(MSGLable)
     index = 1
-    for processLabel in sortProcessLabel:
+    for processLabel in sortedProcessLabel:
         tmpArr = []
         for key in MSGLable.keys():
             if processLabel in key:
@@ -69,9 +91,12 @@ def printMSCContent():
     for msg in ALLMSG:
         if prevMsg.srcLabel == msg.srcLabel and prevMsg.dstLabel == msg.dstLabel and prevMsg.msgType == msg.msgType:
             if index != 0:
+                #message is same as previous one, 
+
                 prevMsg.sameMsgCounter += 1
         else:
             if prevMsg.sameMsgCounter != 1:
+                #avoid show too many same messages, the output will show how many times the messages was sent 
                 content =  prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+ \
                     prevMsg.msgType +"("+str(prevMsg.sameMsgCounter)+")"+"\"];" + "\n"
             else:

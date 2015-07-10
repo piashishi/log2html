@@ -92,7 +92,6 @@ def printMSCContent():
         if prevMsg.srcLabel == msg.srcLabel and prevMsg.dstLabel == msg.dstLabel and prevMsg.msgType == msg.msgType:
             if index != 0:
                 #message is same as previous one, 
-
                 prevMsg.sameMsgCounter += 1
         else:
             if prevMsg.sameMsgCounter != 1:
@@ -124,5 +123,3 @@ def genMSC():
     printMSCContent()
     printMSCEnd()
     return MSCContent
-    
-print genMSC()

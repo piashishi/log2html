@@ -154,9 +154,6 @@ def parseFiles(directroy, direction):
 def parseNGLog(directroy):
     parseFiles(directroy, "IPC_OUT")
     parseFiles(directroy, "IPC_IN")
-    
-    
-parseNGLog("log")
 
 
 

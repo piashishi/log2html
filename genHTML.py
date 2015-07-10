@@ -26,6 +26,7 @@ def genHTML():
     writeMSC(fileObject, genMSC.genMSC())
     writeHTMLEnd(fileObject)
     fileObject.close()
+    print "generate NGLOG.html successfully"
     
 genHTML()
     

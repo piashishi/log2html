@@ -117,6 +117,7 @@ def printMSCEnd():
     
 
 def genMSC():
+    parseLog.parseNGLog("log")
     genMSCLabel()
     printMSCHeader()
     printMSCLabel()

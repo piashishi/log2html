@@ -2,6 +2,7 @@
 
 import re
 import os
+import datetime
 
 import private_data
 
@@ -9,6 +10,20 @@ processPairArray=[]  #collect all out message, each node is messageItem
 
 processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"], ["TRACE_PROXY", "SC"]]
    
+month2num = {   'Jan': 1,
+                'Feb': 2,
+                'Mar': 3,
+                'Apr': 4,
+                'May': 5,
+                'Jun': 6,
+                'Jul': 7,
+                'Aug': 8,
+                'Sep': 9,
+                'Oct': 10,
+                'Nov': 11,
+                'Dec': 12,}
+
+
 class messageItem:
     def __init__(self, timestamp, msgType, msgData):
         self.timestamp = timestamp
@@ -67,11 +82,11 @@ class FragmentMsgProcessor(object):
 
         if seq_num  == seq_total:
             ret_msg = self.msgs[key]
-            ret_msg_type = self.msg_directions[key]
+            ret_msg_dirction = self.msg_directions[key]
             self.msgs.pop(key)
             self.seq_nums.pop(key)
             self.msg_directions.pop(key)
-            return re.split(r' +', ret_msg)[1:], ret_msg_type
+            return re.split(r' +', ret_msg)[1:], ret_msg_dirction
         else:
             return None, None
 
@@ -126,7 +141,19 @@ def checkPlatform(nodeName):
         return "LittleEndian"
     else:
         return "BigEndian"
-    
+
+def lineToDatetime(line):
+    tmpArr = re.split(r' +', line);
+    year  = 2015
+    month =  month2num[tmpArr[0]]
+    day   = int(tmpArr[1])
+
+    hour        = int(tmpArr[2].split(':')[0])
+    minute      = int(tmpArr[2].split(':')[1])
+    second      = int(tmpArr[2].split(':')[2].split('.')[0])
+    microsecond = int(tmpArr[2].split(':')[2].split('.')[1])
+
+    return datetime.datetime(year, month, day, hour, minute, second, microsecond)
 
 #testline = "Jun 18 08:24:53.469097 debug AS7-0 trace_proxy[4618]: [0]: LIBMSG: MMON;28078;1/1;IPC_IN;2D00_000A_FFFF_120A<0800_0201_0400_1724;290979;0; 00 03 00 00 00 00 27 0f 00 00 27 0f 00 00 27 0f 00 00 27 0f 0b 09 08 00 02 01 04 00 2d 00 00 0a ff ff 00 17 24 27 00 00 00 00 81 42 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (libmsg_msgmon.c:306) //146136"        
 
@@ -167,7 +194,8 @@ def parseLine(line, direction):
                 if not pairItem:    #new OUT message
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
-                message = messageItem("12345555", "TRACE_TYPE_INFO_LOG", msgData)
+
+                message = messageItem(lineToDatetime(line), "TRACE_TYPE_INFO_LOG", msgData)
                 pairItem.appendOutMsg(message)
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:
                 if pairItem.dstNode == "CLA-Unknown":

@@ -27,8 +27,14 @@ MSCContent = ""
 
 class MSCItem:
     def __init__(self, msgPair, msgItem):
-        self.src = msgPair.srcNode+"/"+msgPair.src+"_"+str(msgPair.srcInstance)+"["+str(msgPair.srcPid)+"]"
-        self.dst = msgPair.dstNode+"/"+msgPair.dst+"_"+str(msgPair.dstInstance)+"["+str(msgPair.dstPid)+"]"
+        if msgPair.srcInstance != 0:
+            self.src = msgPair.srcNode+"\n"+msgPair.src+"_"+str(msgPair.srcInstance)+"["+str(msgPair.srcPid)+"]"
+        else:
+            self.src = msgPair.srcNode+"\n"+msgPair.src+"["+str(msgPair.srcPid)+"]"
+        if msgPair.dstInstance != 0:
+            self.dst = msgPair.dstNode+"\n"+msgPair.dst+"_"+str(msgPair.dstInstance)+"["+str(msgPair.dstPid)+"]"
+        else:
+            self.dst = msgPair.dstNode+"\n"+msgPair.dst+ "["+ str(msgPair.dstPid)+"]"
         self.msgType = msgItem.msgType
         self.timestamp = msgItem.timestamp
         self.srcLabel = ""
@@ -54,7 +60,7 @@ def get_msg_key(msg):
 def genMSCLabel():
     index = 0
     for pair in parseLog.processPairArray:
-        for data in pair.outMsg:
+        for data in pair.msgDataList:
             msg = MSCItem(pair, data)
             if not MSGLable.has_key(msg.src):
                 MSGLable[msg.src] = str(index)
@@ -113,7 +119,7 @@ def printMSCHeader():
     global MSCContent
     MSCContent += "<mscgen>\n"
     MSCContent += "msc {\n"
-    #print "hscale = \"2\";"
+#    MSCContent += "hscale = \"2\";"
     
 def printMSCEnd():
     global MSCContent

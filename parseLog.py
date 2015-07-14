@@ -6,9 +6,41 @@ import datetime
 
 import private_data
 
+#processInfo should be key: Node, value [(process , [process instance]), ...]
+processesInfo = {}
+
 processPairArray=[]  #collect all out message, each node is messageItem
 
+def collectProcessesInfo(node, process, processInstance):
+
+    if node in processesInfo.keys():
+        processFound = False
+        processInfoList = processesInfo[node]
+        for processInfo in processInfoList:
+            if process == processInfo[0]:
+                processFound = True
+                if not processInstance in processInfo[1]:
+                    processInfo[1].append(processInstance)
+                break
+        if not processFound:
+            newProcessInfo = (process, [])
+            newProcessInfo[1].append(processInstance)
+            processInfoList.append(newProcessInfo)
+    else:
+        newProcessInfo = (process, [])
+        newProcessInfo[1].append(processInstance)
+        processList = []
+        processList.append(newProcessInfo)
+        processesInfo[node] = processList
+        
+        
+            
+        
+        
+    
+
 processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"], ["TRACE_PROXY", "SC"]]
+#processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"]]
    
 month2num = {   'Jan': 1,
                 'Feb': 2,
@@ -36,15 +68,20 @@ class processPair:
         self.src = src
         self.srcInstance = srcInstance
         self.srcPid = srcPid
+
         self.dst = dst
         self.dstInstance = dstInstance
         self.srcNode = srcNode
         self.dstNode = dstNode
-        self.outMsg = []
         self.dstPid = 0
+        self.msgDataList = []
+        self.msgTypeList = []
+
         
-    def appendOutMsg(self, data):
-        self.outMsg.append(data)
+    def appendMsgDataList(self, msgItem):
+        if not msgItem.msgType in self.msgTypeList:
+            self.msgTypeList.append(msgItem.msgType)
+        self.msgDataList.append(msgItem)
     
     #In IPC_OUT message, the dst could be RG, so need replace it with Node name
     def setDstNode(self, realNode):
@@ -58,9 +95,7 @@ def get_msg_str(msg_str):
     return tmp[-1].split('...')[0].split('(')[0]
 
 class FragmentMsgProcessor(object):
-    """ """
     def __init__(self):
-        super(FragmentMsgProcessor, self).__init__()
         self.msgs = {}
         self.seq_nums = {}
         self.msg_directions = {}
@@ -124,7 +159,7 @@ def getNGName(node, node_num, server, ser_num):
     else:
         return getNodeName(node, node_num)
     
-def getPid(platform, lowByte, highByte):
+def hexToInt(platform, lowByte, highByte):
     pid = 0
     if platform == "LittleEndian":
         pid = int(highByte + lowByte, 16) 
@@ -132,16 +167,26 @@ def getPid(platform, lowByte, highByte):
         pid = int(lowByte + highByte, 16)
     return pid
 
+
 def getProcessInstance(value):
     return int(value, 16)
 
 
-def checkPlatform(nodeName):
-    if "CLA" in nodeName:
+def getSrcPlatform(srcNode):
+    if "CLA" in srcNode:
         return "LittleEndian"
     else:
         return "BigEndian"
+    
 
+#ALL IPC_OUT message type will convert to big endian, and all IPC_IN message type will convert to according order
+def getMsgTypePlatform(direction, nodeName):
+    if direction == "IPC_OUT":
+        return "BigEndian"
+    else:
+        return getSrcPlatform(nodeName)
+        
+        
 def lineToDatetime(line):
     tmpArr = re.split(r' +', line);
     year  = 2015
@@ -154,32 +199,6 @@ def lineToDatetime(line):
     microsecond = int(tmpArr[2].split(':')[2].split('.')[1])
 
     return datetime.datetime(year, month, day, hour, minute, second, microsecond)
-
-def msg_type_to_name(process_type, msg_type):
-    msg_name = 'unknown_message'
-    if process_type in private_data.msg_dic:
-        if msg_type in private_data.msg_dic[process_type]:
-            msg_name = private_data.msg_dic[process_type][msg_type] 
-
-    return msg_name +'(' + str(msg_type) + ')'
-
-def line_to_process_type(line):
-    tmp = re.split(r' +', line);
-    process_type = tmp[5].split('[')[0]
-    return process_type
-
-def is_little_endian(msgData):
-    assert(msgData[0] == '00' or msgData[0] == '03')
-    return msgData[0] == '03'
-
-def msg_data_to_msg_type(msgData):
-    msg_type_hex = ''
-    if is_little_endian(msgData):
-        msg_type_hex = msgData[21] + msgData[20]
-    else:
-        msg_type_hex = msgData[20] + msgData[21]
-    msg_type = int(msg_type_hex, 16)
-    return msg_type
 
 #testline = "Jun 18 08:24:53.469097 debug AS7-0 trace_proxy[4618]: [0]: LIBMSG: MMON;28078;1/1;IPC_IN;2D00_000A_FFFF_120A<0800_0201_0400_1724;290979;0; 00 03 00 00 00 00 27 0f 00 00 27 0f 00 00 27 0f 00 00 27 0f 0b 09 08 00 02 01 04 00 2d 00 00 0a ff ff 00 17 24 27 00 00 00 00 81 42 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (libmsg_msgmon.c:306) //146136"        
 
@@ -197,6 +216,7 @@ def parseLine(line, direction):
         matchObj = re.search(r'([0-9A-Fa-f]{2} ){2,}', line); #get MSG content
         if matchObj:
             msgData = re.split(r' ', matchObj.group())
+
                 
             if fragmentFlag != "1/1":
                 msgData, msgDirection = fragmentMsgProc.cache_msg(msgKey, line)
@@ -206,26 +226,28 @@ def parseLine(line, direction):
             srcProcess = private_data.process_map[int(msgData[22], 16)]
             dstProcess = private_data.process_map[int(msgData[28], 16)]
                              
-            if not isNeedTrace(srcProcess, dstProcess):
+            if not isNeedTrace(srcProcess, dstProcess): 
                 return
             
             srcInstance = getProcessInstance(msgData[23])
             dstInstance = getProcessInstance(msgData[29])
             srcNode = getNGName(int(msgData[24], 16), int(msgData[25], 16), int(msgData[26], 16), int(msgData[27], 16))
             dstNode = getNGName(int(msgData[30], 16), int(msgData[31], 16), int(msgData[32], 16), int(msgData[33], 16))
-            srcPid = getPid(checkPlatform(srcNode), msgData[35], msgData[36])
+            srcPid = hexToInt(getSrcPlatform(srcNode), msgData[35], msgData[36])
+            
+            realNode = tmpArr[4]
+            msgType = private_data.msgTypeDict[hexToInt(getMsgTypePlatform(msgDirection, realNode), \
+                                                        msgData[20], msgData[21])]
 
+            
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
             if msgDirection == direction and direction == "IPC_OUT":
                 if not pairItem:    #new OUT message
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
-
-                process_type = line_to_process_type(line)
-                msg_type = msg_data_to_msg_type(msgData)
-                msg_type_name = msg_type_to_name(process_type, msg_type)
-                message = messageItem(lineToDatetime(line), msg_type_name, msgData)
-                pairItem.appendOutMsg(message)
+                    
+                message = messageItem(lineToDatetime(line), msgType, msgData)
+                pairItem.appendMsgDataList(message)
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:
                 if pairItem.dstNode == "CLA-Unknown":
                     pairItem.setDstNode(tmpArr[4])
@@ -248,7 +270,20 @@ def parseFiles(directroy, direction):
 def parseNGLog(directroy):
     parseFiles(directroy, "IPC_OUT")
     parseFiles(directroy, "IPC_IN")
+    
 
+def getALLProcessesInfo():
+    for item in processPairArray:
+        collectProcessesInfo(item.srcNode, item.src, item.srcInstance)
+        collectProcessesInfo(item.dstNode, item.dst, item.dstInstance)
+        
+
+def test():
+    parseNGLog("log")
+    getALLProcessesInfo()
+    print processesInfo
+    
+test()
 
 
             

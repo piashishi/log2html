@@ -1,6 +1,7 @@
 #!/usr/bin/python 
 
 import parseLog
+import datetime
 
 
 # the msc format is like that:
@@ -44,6 +45,9 @@ def sortProcessLabel():
         if not process[1] in sortedProcessLabel:
             sortedProcessLabel.append(process[1])
             
+def get_msg_key(msg):
+    return msg.timestamp
+    
 #the function will do:
 #1: generate   MSCItem 
 #2: generate    MSGLable
@@ -61,6 +65,7 @@ def genMSCLabel():
             msg.srcLabel = MSGLable[msg.src]
             msg.dstLabel = MSGLable[msg.dst]
             ALLMSG.append(msg)
+    ALLMSG.sort(key = get_msg_key)
     sortProcessLabel()
 
 def printMSCLabel():

@@ -155,6 +155,32 @@ def lineToDatetime(line):
 
     return datetime.datetime(year, month, day, hour, minute, second, microsecond)
 
+def msg_type_to_name(process_type, msg_type):
+    msg_name = 'unknown_message'
+    if process_type in private_data.msg_dic:
+        if msg_type in private_data.msg_dic[process_type]:
+            msg_name = private_data.msg_dic[process_type][msg_type] 
+
+    return msg_name +'(' + str(msg_type) + ')'
+
+def line_to_process_type(line):
+    tmp = re.split(r' +', line);
+    process_type = tmp[5].split('[')[0]
+    return process_type
+
+def is_little_endian(msgData):
+    assert(msgData[0] == '00' or msgData[0] == '03')
+    return msgData[0] == '03'
+
+def msg_data_to_msg_type(msgData):
+    msg_type_hex = ''
+    if is_little_endian(msgData):
+        msg_type_hex = msgData[21] + msgData[20]
+    else:
+        msg_type_hex = msgData[20] + msgData[21]
+    msg_type = int(msg_type_hex, 16)
+    return msg_type
+
 #testline = "Jun 18 08:24:53.469097 debug AS7-0 trace_proxy[4618]: [0]: LIBMSG: MMON;28078;1/1;IPC_IN;2D00_000A_FFFF_120A<0800_0201_0400_1724;290979;0; 00 03 00 00 00 00 27 0f 00 00 27 0f 00 00 27 0f 00 00 27 0f 0b 09 08 00 02 01 04 00 2d 00 00 0a ff ff 00 17 24 27 00 00 00 00 81 42 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (libmsg_msgmon.c:306) //146136"        
 
 fragmentMsgProc = FragmentMsgProcessor() 
@@ -195,7 +221,10 @@ def parseLine(line, direction):
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
 
-                message = messageItem(lineToDatetime(line), "TRACE_TYPE_INFO_LOG", msgData)
+                process_type = line_to_process_type(line)
+                msg_type = msg_data_to_msg_type(msgData)
+                msg_type_name = msg_type_to_name(process_type, msg_type)
+                message = messageItem(lineToDatetime(line), msg_type_name, msgData)
                 pairItem.appendOutMsg(message)
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:
                 if pairItem.dstNode == "CLA-Unknown":

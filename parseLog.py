@@ -96,31 +96,27 @@ def get_msg_str(msg_str):
 
 class FragmentMsgProcessor(object):
     def __init__(self):
-        self.msgs = {}
-        self.seq_nums = {}
-        self.msg_directions = {}
+        self.msg_infos = {}
 
     def cache_msg(self, key, msg):
         tmpArr = re.split(r' +', msg);
         seq = tmpArr[8].split(";")[2] # seq = '1/2'
 
-        if not self.seq_nums.has_key(key):
-            self.msgs[key] = ''
-            self.seq_nums[key] = 0
-            self.msg_directions[key] = tmpArr[8].split(";")[3] # IPC_OUT/IPC_IN
+        if not self.msg_infos.has_key(key):
+            self.msg_infos[key] = {'seq_num': 0 , 
+                                   'msg'    : '', 
+                                   'msg_direction': tmpArr[8].split(";")[3]} # IPC_OUT/IPC_IN
 
         seq_num, seq_total = int(seq.split('/')[0]), int(seq.split('/')[1])
 
-        if seq_num == self.seq_nums[key] + 1:
-            self.msgs[key] = self.msgs[key] + get_msg_str(msg)
-            self.seq_nums[key] = seq_num
+        if seq_num == self.msg_infos[key]['seq_num'] + 1:
+            self.msg_infos[key]['msg'] = self.msg_infos[key]['msg'] + get_msg_str(msg)
+            self.msg_infos[key]['seq_num'] = seq_num
 
         if seq_num  == seq_total:
-            ret_msg = self.msgs[key]
-            ret_msg_dirction = self.msg_directions[key]
-            self.msgs.pop(key)
-            self.seq_nums.pop(key)
-            self.msg_directions.pop(key)
+            ret_msg = self.msg_infos[key]['msg']
+            ret_msg_dirction = self.msg_infos[key]['msg_direction']
+            self.msg_infos.pop(key)
             return re.split(r' +', ret_msg)[1:], ret_msg_dirction
         else:
             return None, None
@@ -200,6 +196,12 @@ def lineToDatetime(line):
 
     return datetime.datetime(year, month, day, hour, minute, second, microsecond)
 
+def msgTypeToName(msgType):
+    if msgType in private_data.msgTypeDict:
+        return private_data.msgTypeDict[msgType]
+
+    return 'unknown_msg(%d)' % msgType
+
 #testline = "Jun 18 08:24:53.469097 debug AS7-0 trace_proxy[4618]: [0]: LIBMSG: MMON;28078;1/1;IPC_IN;2D00_000A_FFFF_120A<0800_0201_0400_1724;290979;0; 00 03 00 00 00 00 27 0f 00 00 27 0f 00 00 27 0f 00 00 27 0f 0b 09 08 00 02 01 04 00 2d 00 00 0a ff ff 00 17 24 27 00 00 00 00 81 42 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (libmsg_msgmon.c:306) //146136"        
 
 fragmentMsgProc = FragmentMsgProcessor() 
@@ -236,9 +238,8 @@ def parseLine(line, direction):
             srcPid = hexToInt(getSrcPlatform(srcNode), msgData[35], msgData[36])
             
             realNode = tmpArr[4]
-            msgType = private_data.msgTypeDict[hexToInt(getMsgTypePlatform(msgDirection, realNode), \
-                                                        msgData[20], msgData[21])]
-
+            msgType = msgTypeToName(hexToInt(getMsgTypePlatform(msgDirection, realNode), \
+                                                        msgData[20], msgData[21]))
             
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
             if msgDirection == direction and direction == "IPC_OUT":

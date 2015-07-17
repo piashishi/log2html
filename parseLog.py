@@ -196,11 +196,11 @@ def lineToDatetime(line):
 
     return datetime.datetime(year, month, day, hour, minute, second, microsecond)
 
-def msgTypeToName(msgType):
+def msgTypeToNameAndColor(msgType):
     if msgType in private_data.msgTypeDict:
-        return private_data.msgTypeDict[msgType]
+        return private_data.msgTypeDict[msgType]['name'], private_data.msgTypeDict[msgType]['color']
 
-    return 'unknown_msg(%d)' % msgType
+    return 'unknown_msg(%d)' % msgType, private_data.unknownMsgColor
 
 #testline = "Jun 18 08:24:53.469097 debug AS7-0 trace_proxy[4618]: [0]: LIBMSG: MMON;28078;1/1;IPC_IN;2D00_000A_FFFF_120A<0800_0201_0400_1724;290979;0; 00 03 00 00 00 00 27 0f 00 00 27 0f 00 00 27 0f 00 00 27 0f 0b 09 08 00 02 01 04 00 2d 00 00 0a ff ff 00 17 24 27 00 00 00 00 81 42 00 08 00 00 00 00 f1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (libmsg_msgmon.c:306) //146136"        
 
@@ -238,8 +238,6 @@ def parseLine(line, direction):
             srcPid = hexToInt(getSrcPlatform(srcNode), msgData[35], msgData[36])
             
             realNode = tmpArr[4]
-            msgType = msgTypeToName(hexToInt(getMsgTypePlatform(msgDirection, realNode), \
-                                                        msgData[20], msgData[21]))
             
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
             if msgDirection == direction and direction == "IPC_OUT":
@@ -247,6 +245,7 @@ def parseLine(line, direction):
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
                     
+                msgType = hexToInt(getMsgTypePlatform(msgDirection, realNode), msgData[20], msgData[21])
                 message = messageItem(lineToDatetime(line), msgType, msgData)
                 pairItem.appendMsgDataList(message)
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:

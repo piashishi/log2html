@@ -105,12 +105,14 @@ def printMSCContent():
                 #message is same as previous one, 
                 prevMsg.sameMsgCounter += 1
         else:
+            msgName, msgColor = parseLog.msgTypeToNameAndColor(prevMsg.msgType)
             if prevMsg.sameMsgCounter != 1:
                 #avoid show too many same messages, the output will show how many times the messages was sent 
-                content =  prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+ \
-                    prevMsg.msgType +"("+str(prevMsg.sameMsgCounter)+")"+"\"];" + "\n"
+                content = "%s=>%s [ label = \"%s(%d)\", textcolor = \"%s\", linecolor = \"%s\"];\n" %  \
+                    (prevMsg.srcLabel, prevMsg.dstLabel, msgName, prevMsg.sameMsgCounter, msgColor, msgColor)
             else:
-                content =  prevMsg.srcLabel +"=>"+prevMsg.dstLabel +" [ label = \""+prevMsg.msgType + "\"];" + "\n"
+                content = "%s=>%s [ label = \"%s\", textcolor = \"%s\", linecolor = \"%s\"];\n" % \
+                    (prevMsg.srcLabel, prevMsg.dstLabel, msgName, msgColor, msgColor)
             MSCContent += content
             prevMsg = msg
         index += 1

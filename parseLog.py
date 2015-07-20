@@ -239,7 +239,7 @@ def parseLine(line, direction):
             
             realNode = tmpArr[4]   
             msgType = hexToInt(getMsgTypePlatform(msgDirection, realNode), msgData[20], msgData[21])
-            
+            msgTypeName, _ = msgTypeToNameAndColor(msgType)
             
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
             if msgDirection == direction and direction == "IPC_OUT":
@@ -249,7 +249,7 @@ def parseLine(line, direction):
                  
                 message = messageItem(lineToDatetime(line), msgType, msgData)
                 pairItem.appendMsgDataList(message)
-                collectMsgTypesInfo(msgType, srcProcess, dstProcess)  
+                collectMsgTypesInfo(msgTypeName, srcProcess, dstProcess)  
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:
                 if pairItem.dstNode == "CLA-Unknown":
                     pairItem.setDstNode(tmpArr[4])
@@ -263,7 +263,7 @@ def parseFile(fileName, direction):
     fp.close()
 
 def parseFiles(directroy, direction):
-    for root, dirs,files in os.walk(directroy):
+    for root, _,files in os.walk(directroy):
         for logFile in files:
             matchObj = re.search(r"log$", logFile)    
             if matchObj:

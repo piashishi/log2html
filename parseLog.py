@@ -2,12 +2,16 @@
 
 import re
 import os
+import json
 import datetime
+
 
 import private_data
 
 #processInfo should be key: Node, value [(process , [process instance]), ...]
 processesInfo = {}
+#msgTypesInfo : key: msgType, value: (srcProcess, dstProcess)
+msgTypesInfo = {}
 
 processPairArray=[]  #collect all out message, each node is messageItem
 
@@ -33,12 +37,12 @@ def collectProcessesInfo(node, process, processInstance):
         processList.append(newProcessInfo)
         processesInfo[node] = processList
         
-        
+
+def collectMsgTypesInfo(msgType, srcProcess, dstProcess):        
+    if not msgType in msgTypesInfo.keys():
+        msgTypesInfo[msgType] = (srcProcess, dstProcess)
             
         
-        
-    
-
 processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"], ["TRACE_PROXY", "SC"]]
 #processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"]]
    
@@ -75,12 +79,9 @@ class processPair:
         self.dstNode = dstNode
         self.dstPid = 0
         self.msgDataList = []
-        self.msgTypeList = []
 
         
     def appendMsgDataList(self, msgItem):
-        if not msgItem.msgType in self.msgTypeList:
-            self.msgTypeList.append(msgItem.msgType)
         self.msgDataList.append(msgItem)
     
     #In IPC_OUT message, the dst could be RG, so need replace it with Node name
@@ -219,7 +220,6 @@ def parseLine(line, direction):
         if matchObj:
             msgData = re.split(r' ', matchObj.group())
 
-                
             if fragmentFlag != "1/1":
                 msgData, msgDirection = fragmentMsgProc.cache_msg(msgKey, line)
                 if not msgData:
@@ -237,17 +237,19 @@ def parseLine(line, direction):
             dstNode = getNGName(int(msgData[30], 16), int(msgData[31], 16), int(msgData[32], 16), int(msgData[33], 16))
             srcPid = hexToInt(getSrcPlatform(srcNode), msgData[35], msgData[36])
             
-            realNode = tmpArr[4]
+            realNode = tmpArr[4]   
+            msgType = hexToInt(getMsgTypePlatform(msgDirection, realNode), msgData[20], msgData[21])
+            
             
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
             if msgDirection == direction and direction == "IPC_OUT":
                 if not pairItem:    #new OUT message
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
-                    
-                msgType = hexToInt(getMsgTypePlatform(msgDirection, realNode), msgData[20], msgData[21])
+                 
                 message = messageItem(lineToDatetime(line), msgType, msgData)
                 pairItem.appendMsgDataList(message)
+                collectMsgTypesInfo(msgType, srcProcess, dstProcess)  
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:
                 if pairItem.dstNode == "CLA-Unknown":
                     pairItem.setDstNode(tmpArr[4])
@@ -278,12 +280,12 @@ def getALLProcessesInfo():
         collectProcessesInfo(item.dstNode, item.dst, item.dstInstance)
         
 
-def test():
-    parseNGLog("log")
-    getALLProcessesInfo()
-    print processesInfo
-    
-test()
-
-
+def generateJsonFile():
+    if len(processPairArray) != 0:
+        getALLProcessesInfo()
+        with open('nodes.json', 'w') as outfile:
+            json.dump(processesInfo, outfile)
+        with open('msgTypes.json', 'w') as outfile:
+            json.dump(msgTypesInfo, outfile)
             
+    

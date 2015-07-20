@@ -1,6 +1,7 @@
 #!/usr/bin/python 
 
 import parseLog
+
 import datetime
 
 
@@ -131,6 +132,7 @@ def printMSCEnd():
 
 def genMSC():
     parseLog.parseNGLog("log")
+    parseLog.generateJsonFile()
     genMSCLabel()
     printMSCHeader()
     printMSCLabel()

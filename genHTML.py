@@ -7,39 +7,51 @@ def writeHTMLhead(fileObject):
     head = "<html><head><script src=\"./mscgen-inpage.js\" defer></script> \
     <script type=\"text/javascript\" src=\"jquery-1.11.3.min.js\"></script> \
     <script type=\"text/javascript\" src=\"./genFilter.js\"></script> \
+    <link type=\"text/css\" href=\"show.css\" rel=\"stylesheet\"></script> \
     </head><body>"
     fileObject.write(head)
     
 def writeBody(fileObject):
-    body = '''<div id="div1">
-        <p>one</p>
-    <select id="node_1" onchange="addProcessOptions(this.value, this.id)">
-        <option value="0">Choose Node...</option>
-    </select>
-    <select id="process_1" onchange="addInstanceOptions(this.value, this.id)">
-            <option value="0">Choose Process...</option>
-    </select>
-    <select id="instance_1" >
-            <option value="0">Choose Instance...</option>
-    </select>
-    <p>two</p>
-    <select id="node_2" onchange="addProcessOptions(this.value, this.id)">
-        <option value="0">Choose Node...</option>
-    </select>
-    <select id="process_2" onchange="addInstanceOptions(this.value, this.id)">
-            <option value="0">Choose Process...</option>
-    </select>
-    <select id="instance_2">
-            <option value="0">Choose Instance...</option>
-    </select>
-    <ul id="listID"></ul>
-</div>'''
+    body = '''
+    <div class="main_div">
+        <div class="filter_div">
+            <p>Process One</p>
+            <select id="node_1" onchange="addProcessOptions(this.value, this.id)">
+                <option value="0">Nodes...</option>
+            </select>
+            <select id="process_1" onchange="addInstanceOptions(this.value, this.id)">
+                <option value="0">Processes...</option>
+            </select>
+            <select id="instance_1" >
+                <option value="0">Instances...</option>
+            </select>
+            <p>Process Two</p>
+            <select id="node_2" onchange="addProcessOptions(this.value, this.id)">
+                <option value="0">Nodes...</option>
+            </select>
+            <select id="process_2" onchange="addInstanceOptions(this.value, this.id)">
+                <option value="0">Processes...</option>
+            </select>
+            <select id="instance_2">
+                <option value="0">Instances...</option>
+            </select>
+            <p>-------------------------------------</P>
+            <div class="msgType_div">
+                <ul id="listID"></ul>
+            </div>
+            <button type="button">Apply Filter</button>
+        </div>
+        <div class="show_div">'''
     fileObject.write(body)
     
 
     
 def writeMSC(fileObject, MSC):
     fileObject.write(MSC)
+    bodyEnd = '''        </div>
+    </div>'''
+    fileObject.write(bodyEnd)
+    
     
 def writeHTMLEnd(fileObject):
     fileObject.write("</body></html>")

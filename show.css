@@ -1,0 +1,29 @@
+div.main_div {
+	width:1600px;
+}
+div.filter_div {
+	width:400px; 
+	float:left;
+}
+
+div.show_div {
+	width:1200; 
+	float:right;
+}
+
+ul li{
+list-style-type:none;
+}
+
+input{
+position:absolute;
+left:10px;
+}
+
+p {
+	font-family:Arial,Verdana,Sans-serif;
+}
+span {
+		font-family:Arial,Verdana,Sans-serif;
+		font-size: 80%
+}

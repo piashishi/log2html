@@ -14,30 +14,24 @@ def writeHTMLhead(fileObject):
 def writeBody(fileObject):
     body = '''
     <div class="main_div">
-        <div class="filter_div">
+        <div id="filter_div">
             <p>Process One</p>
-            <select id="node_1" onchange="addProcessOptions(this.value, this.id)">
-                <option value="0">Nodes...</option>
+            <select class="srcNode" onchange="addProcessOptions(this.value, this)">
             </select>
-            <select id="process_1" onchange="addInstanceOptions(this.value, this.id)">
-                <option value="0">Processes...</option>
+            <select class="srcProcess" onchange="addInstanceOptions(this.value, this)">
             </select>
-            <select id="instance_1" >
-                <option value="0">Instances...</option>
+            <select class="srcInstance" >
             </select>
             <p>Process Two</p>
-            <select id="node_2" onchange="addProcessOptions(this.value, this.id)">
-                <option value="0">Nodes...</option>
+            <select class="dstNode" onchange="addProcessOptions(this.value, this)">
             </select>
-            <select id="process_2" onchange="addInstanceOptions(this.value, this.id)">
-                <option value="0">Processes...</option>
+            <select class="dstProcess" onchange="addInstanceOptions(this.value, this)">
             </select>
-            <select id="instance_2">
-                <option value="0">Instances...</option>
+            <select class="dstInstance">
             </select>
             <p>-------------------------------------</P>
             <div class="msgType_div">
-                <ul id="listID"></ul>
+                <ul class="listID"></ul>
             </div>
             <button type="button">Apply Filter</button>
         </div>

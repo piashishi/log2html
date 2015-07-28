@@ -13,7 +13,8 @@ def writeHTMLhead(fileObject):
     
 def writeBody(fileObject):
     body = '''
-    <div class="main_div">
+<div class="main_div">
+    <div class="filter">
         <div id="filter_div">
             <p>Process One</p>
             <select class="srcNode" onchange="addProcessOptions(this.value, this)">
@@ -33,15 +34,21 @@ def writeBody(fileObject):
             <div class="msgType_div">
                 <ul class="listID"></ul>
             </div>
-            <button type="button">Apply Filter</button>
+            <div class="button_div">
+                <button type="button" class="apply">Apply Filter</button>
+                <button type="button" class="add"> Add</button>
+                <button type="button" class="del">Del</button>
+            </div>
         </div>
-        <div class="show_div">'''
+    </div>
+    <div class="show_div">'''
     fileObject.write(body)
     
 
     
 def writeMSC(fileObject, MSC):
     fileObject.write(MSC)
+    
     bodyEnd = '''        </div>
     </div>'''
     fileObject.write(bodyEnd)

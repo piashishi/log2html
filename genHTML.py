@@ -15,7 +15,7 @@ def writeBody(fileObject):
     body = '''
 <div class="main_div">
     <div class="filter">
-        <div id="filter_div">
+        <div class="filterclass" id="filter_div">
             <p>Process One</p>
             <select class="srcNode" onchange="addProcessOptions(this.value, this)">
             </select>
@@ -30,14 +30,13 @@ def writeBody(fileObject):
             </select>
             <select class="dstInstance">
             </select>
-            <p>-------------------------------------</P>
             <div class="msgType_div">
                 <ul class="listID"></ul>
             </div>
             <div class="button_div">
                 <button type="button" class="apply">Apply Filter</button>
-                <button type="button" class="add"> Add</button>
-                <button type="button" class="del">Del</button>
+                <button type="button" class="del"> Del</button>
+                <button type="button" class="add">Add</button>
             </div>
         </div>
     </div>

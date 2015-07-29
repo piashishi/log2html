@@ -8,8 +8,8 @@ div.filter {
 }
 
 div.filterclass {
-	border-bottom :1px dashed gray;
-	padding-bottom:5px;
+		border-bottom :1px dashed gray;
+		padding-bottom:5px;
 }
 
 div.show_div {
@@ -30,8 +30,8 @@ p {
 	font-family:Arial,Verdana,Sans-serif;
 }
 span {
-	font-family:Arial,Verdana,Sans-serif;
-	font-size: 80%
+		font-family:Arial,Verdana,Sans-serif;
+		font-size: 80%
 }
 
 button.add  {

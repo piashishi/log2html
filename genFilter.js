@@ -25,6 +25,18 @@ $(document).ready(function() {
         parseNodeInfo(json)
         addNodeOptions("filter_div")
     })
+    
+    $(".add").click(function(){
+        var new_filter_div =  $('#filter_div').clone(true)
+        $('.filter').append(new_filter_div)
+    });
+
+    $(".del").click(function(){
+        if ($(".filter").children().length > 1) { // TODO
+            var ff = $(this).parent().parent();
+            ff.remove();
+        }
+    });
 })
 
 function parseNodeInfo(nodeinfoJson) {

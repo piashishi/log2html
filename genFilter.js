@@ -33,12 +33,10 @@ $(document).ready(function() {
     })
 
     $(".del").click(function(){
-        if ($(".filter").children().length > 1) { // TODO
-            var ff = $(this).parent().parent()
-            ff.remove()
-        } 
+        var ff = $(this).parent().parent()
+        ff.remove()
 
-        if ($(".filter").children().length == 1){
+        if ($(".filterclass").length == 1){
             $(".del").attr('disabled', "disabled")
         }
     })

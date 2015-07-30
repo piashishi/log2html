@@ -35,7 +35,7 @@ def writeBody(fileObject):
             </div>
             <div class="button_div">
                 <button type="button" class="apply">Apply Filter</button>
-                <button type="button" class="del"> Del</button>
+                <button type="button" class="del" disabled="disabled">Del</button>
                 <button type="button" class="add">Add</button>
             </div>
         </div>

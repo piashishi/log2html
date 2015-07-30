@@ -29,14 +29,19 @@ $(document).ready(function() {
     $(".add").click(function(){
         var new_filter_div =  $('#filter_div').clone(true)
         $('.filter').append(new_filter_div)
-    });
+        $('.del').removeAttr("disabled")
+    })
 
     $(".del").click(function(){
         if ($(".filter").children().length > 1) { // TODO
-            var ff = $(this).parent().parent();
-            ff.remove();
+            var ff = $(this).parent().parent()
+            ff.remove()
+        } 
+
+        if ($(".filter").children().length == 1){
+            $(".del").attr('disabled', "disabled")
         }
-    });
+    })
 })
 
 function parseNodeInfo(nodeinfoJson) {

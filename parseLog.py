@@ -5,7 +5,6 @@ import os
 import json
 import datetime
 
-
 import private_data
 
 #processInfo should be key: Node, value [(process , [process instance]), ...]
@@ -268,24 +267,22 @@ def parseFiles(directroy, direction):
             matchObj = re.search(r"log$", logFile)    
             if matchObj:
                 parseFile(root + "\\" + logFile, direction)
-
-def parseNGLog(directroy):
-    parseFiles(directroy, "IPC_OUT")
-    parseFiles(directroy, "IPC_IN")
-    
-
+                
 def getALLProcessesInfo():
     for item in processPairArray:
         collectProcessesInfo(item.srcNode, item.src, item.srcInstance)
         collectProcessesInfo(item.dstNode, item.dst, item.dstInstance)
-        
 
-def generateJsonFile():
+def parseNGLog(directroy):
+    parseFiles(directroy, "IPC_OUT")
+    parseFiles(directroy, "IPC_IN")
     if len(processPairArray) != 0:
         getALLProcessesInfo()
-        with open('nodes.json', 'w') as outfile:
-            json.dump(processesInfo, outfile)
-        with open('msgTypes.json', 'w') as outfile:
-            json.dump(msgTypesInfo, outfile)
-            
+    msgTypeJson = json.dumps(msgTypesInfo)
+    processJson = json.dumps(processesInfo)
+    return processJson, msgTypeJson
     
+
+
+
+

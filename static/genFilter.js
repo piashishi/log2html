@@ -16,26 +16,6 @@ instanceList[0] = {
     v : "0"
 };
 
-$(document).ready(function() {
-    $("#apply").click(function() {
-        $.ajax({
-            type : "POST",
-            data : "yes",
-            success : function(data) {
-                alert(data)
-            }
-        })
-    })
-
-    $.getJSON('msgTypes.json', function(json) {
-        msgTypeJson = json
-    })
-
-    $.getJSON('nodes.json', function(json) {
-        parseNodeInfo(json)
-        addNodeOptions("filter_div")
-    })
-})
 
 function parseNodeInfo(nodeinfoJson) {
     var node_index = 0

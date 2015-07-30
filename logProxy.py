@@ -1,5 +1,7 @@
 import web
 
+import parseLog
+
 render = web.template.render('templates/')
 
 urls = (
@@ -8,7 +10,8 @@ urls = (
 
 class index:
     def GET(self):
-        return render.index()
+        processInfo, msgTypeInfo = parseLog.parseNGLog("log")
+        return render.index(processInfo, msgTypeInfo)
     
     def POST(self):
         content = web.data()

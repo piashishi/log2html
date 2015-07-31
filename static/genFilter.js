@@ -131,3 +131,20 @@ function addMsgTypeCheckBoxes(divID) {
         }
     }
 }
+
+
+function getFilter() {
+    var count = $(".srcNode").size();
+    for ( var i = 0; i < count; i++) {
+        var srcNode = $(".srcNode").eq(i).find("option:selected").text();
+        var srcProcess = $(".srcProcess").eq(i).find("option:selected").text();
+        var srcInstance = $(".srcInstance").eq(i).find("option:selected").text();
+        var dstNode = $(".dstNode").eq(i).find("option:selected").text();
+        var dstProcess = $(".dstProcess").eq(i).find("option:selected").text();
+        var dstInstance = $(".dstInstance").eq(i).find("option:selected").text();
+        
+        alert(srcNode + srcProcess + srcInstance + dstNode + dstProcess
+                + dstInstance)
+    }
+}
+

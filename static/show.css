@@ -3,13 +3,13 @@ div.main_div {
 }
 div.filter {
  	width:400px;
-	border-right :2px solid gray;
 	float:left;
 }
 
 div.filterclass {
-		border-bottom :1px dashed gray;
-		padding-bottom:5px;
+	border-bottom :1px dashed gray;
+	border-right :2px solid gray;
+	padding-bottom:25px;
 }
 
 div.show_div {
@@ -32,6 +32,10 @@ p {
 span {
 		font-family:Arial,Verdana,Sans-serif;
 		font-size: 80%
+}
+
+#apply {
+	margin-top: 5px;
 }
 
 button.add  {

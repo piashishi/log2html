@@ -55,35 +55,35 @@ $def with (processJson, msgType)
     </head>
     <body>
         <div class="main_div">
-        <div class="filter">
-        <div class="filterclass" id="filter_div_0">
-            <p>Process One</p>
-            <select class="srcNode" onchange="addProcessOptions(this.value, this)">
-            </select>
-            <select class="srcProcess" onchange="addInstanceOptions(this.value, this)">
-            </select>
-            <select class="srcInstance" >
-            </select>
-            <p>Process Two</p>
-            <select class="dstNode" onchange="addProcessOptions(this.value, this)">
-            </select>
-            <select class="dstProcess" onchange="addInstanceOptions(this.value, this)">
-            </select>
-            <select class="dstInstance">
-            </select>
-            <p>Available Messages Type</P>
-            <div class="msgType_div">
-                <ul class="listID"></ul>
+            <div class="filter">
+                <div class="filterclass" id="filter_div_0">
+                    <p>Process One</p>
+                    <select class="srcNode" onchange="addProcessOptions(this.value, this)">
+                    </select>
+                    <select class="srcProcess" onchange="addInstanceOptions(this.value, this)">
+                    </select>
+                    <select class="srcInstance" >
+                    </select>
+                    <p>Process Two</p>
+                    <select class="dstNode" onchange="addProcessOptions(this.value, this)">
+                    </select>
+                    <select class="dstProcess" onchange="addInstanceOptions(this.value, this)">
+                     </select>
+                    <select class="dstInstance">
+                    </select>
+                    <p>Available Messages Type</P>
+                    <div class="msgType_div">
+                        <ul class="listID"></ul>
+                    </div>
+                    <div class="button_div">
+                        <button type="button" class="del" disabled="disabled">Del</button>
+                        <button type="button" class="add">Add</button>
+                    </div>
+                </div>
+                <button type="button" id="apply">Apply Filter</button>
             </div>
-            <div class="button_div">
-                <button type="button" class="del" disabled="disabled">Del</button>
-                <button type="button" class="add">Add</button>
-            </div>
+  		    <div class="show_div">
+    	   </div>
         </div>
-        <button type="button" id="apply">Apply Filter</button>
-    	</div>
-  		<div class="show_div">
-    	</div>
-  	</div>
-  </body>
+    </body>
 </html>

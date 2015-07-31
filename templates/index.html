@@ -1,25 +1,28 @@
 $def with (processJson, msgType)
 <html>
-	<head>
-		<script src="static/mscgen-inpage.js" defer></script>     
-		<script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
- 		<script type="text/javascript" src="static/genFilter.js"></script>
-		<script type="text/javascript">
-			jQuery(document).ready(function() {
-				jQuery("#apply").click(function() {
-        	jQuery.ajax({
-            	type : "POST",
-            	data : "yes",
-            	success : function(data) {
-                	alert(data)
-            	}
-        	})
-    		})
-    		
+    <head>
+        <script src="static/mscgen-inpage.js" defer></script>     
+        <script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
+        <script type="text/javascript" src="static/genFilter.js"></script>
+        <script type="text/javascript">
+            jQuery(document).ready(function() {
+                jQuery("#apply").click(function() {
+            jQuery.ajax({
+                type : "POST",
+                data : "yes",
+                success : function(data) {
+                    alert(data)
+                }
+            })
+            })
+            
     jQuery(".add").click(function(){
-      var new_filter_div =  jQuery('#filter_div').clone(true)
-      jQuery('.filter').append(new_filter_div)
-      jQuery('.del').removeAttr("disabled")
+        var new_filter_div =  reserved_filter_div.clone(true)
+        var last_div_nbr = get_last_div_nbr()
+        var new_div_id = 'filter_div_' + (last_div_nbr + 1)
+        new_filter_div.attr('id', new_div_id)
+        jQuery('.filter').append(new_filter_div)
+        jQuery('.del').removeAttr("disabled")
     })
 
     jQuery(".del").click(function(){
@@ -29,21 +32,31 @@ $def with (processJson, msgType)
             jQuery(".del").attr('disabled', "disabled")
         }
     })
+    
+    function get_last_div_nbr() {
+        var last_div = jQuery('.filterclass')[jQuery('.filterclass').length - 1]
+        var last_div_nbr = parseInt(/filter_div_(\d+)/.exec(last_div.id)[1], 10);
+        return last_div_nbr
+    }
 
-    		msgTypeJson =  $:msgType 
-    		var processJson =  $:processJson 
+    msgTypeJson =  $:msgType 
+    var processJson =  $:processJson 
 
-    		parseNodeInfo(processJson)
-    		addNodeOptions("filter_div")
-			});
-		</script>   
-		<link type="text/css" href="static/show.css" rel="stylesheet"></script>     
-	</head>
-	<body>
-		<div class="main_div">
-    	<div class="filter">
-        <div class="filterclass" id="filter_div">
-           	<p>Process One</p>
+    parseNodeInfo(processJson)
+    addNodeOptions("filter_div_0")
+    
+    var reserved_filter_div =  jQuery('#filter_div_0').clone(true) // TODO
+            });
+    
+    
+        </script>   
+        <link type="text/css" href="static/show.css" rel="stylesheet"></script>     
+    </head>
+    <body>
+        <div class="main_div">
+        <div class="filter">
+        <div class="filterclass" id="filter_div_0">
+            <p>Process One</p>
             <select class="srcNode" onchange="addProcessOptions(this.value, this)">
             </select>
             <select class="srcProcess" onchange="addInstanceOptions(this.value, this)">
@@ -67,9 +80,9 @@ $def with (processJson, msgType)
                 <button type="button" class="add">Add</button>
             </div>
         </div>
-    	</div>
-  		<div class="show_div">
-    	</div>
-  	</div>
+        </div>
+        <div class="show_div">
+        </div>
+    </div>
   </body>
 </html>

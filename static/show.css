@@ -28,10 +28,15 @@ left:10px;
 
 p {
 	font-family:Arial,Verdana,Sans-serif;
+	margin-top: 1px;
+	padding-top: 1px;
+	margin-bottom: 2px;
+	padding-bottom: 2px;
 }
+
 span {
-		font-family:Arial,Verdana,Sans-serif;
-		font-size: 80%
+	font-family:Arial,Verdana,Sans-serif;
+	font-size: 80%
 }
 
 #apply {

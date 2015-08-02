@@ -60,10 +60,12 @@ month2num = {   'Jan': 1,
 
 
 class messageItem:
-    def __init__(self, timestamp, msgType, msgData):
+    def __init__(self, timestamp, msgType, msgData, msgString):
         self.timestamp = timestamp
         self.msgType = msgType
+        self.msgString = msgString
         self.msgData = msgData
+
     
 #processPairMessage, store IPC_OUT messages for one process pair(srcProcess->dstProcess)
 class processPair:
@@ -127,12 +129,6 @@ def findProcessPair(srcNode, src, srcInstance, dstNode, dst, dstInstance, sender
         and tmp.dstNode == dstNode and tmp.dstInstance ==dstInstance and tmp.srcPid == senderPid:
             return tmp
     return None
-
-def isNeedTrace(src, dst):
-    for pair in processPairNeedProcess:
-        if (pair[0] == src and pair[1] == dst) or (pair[0] == dst and pair[1] == src):
-            return True
-    return False
 
 def getNodeName(node, num):
     if node == 0:    #0 mean AS_NODE
@@ -226,10 +222,6 @@ def parseLine(line, direction):
             
             srcProcess = private_data.process_map[int(msgData[22], 16)]
             dstProcess = private_data.process_map[int(msgData[28], 16)]
-                             
-            if not isNeedTrace(srcProcess, dstProcess): 
-                return
-            
             srcInstance = getProcessInstance(msgData[23])
             dstInstance = getProcessInstance(msgData[29])
             srcNode = getNGName(int(msgData[24], 16), int(msgData[25], 16), int(msgData[26], 16), int(msgData[27], 16))
@@ -246,7 +238,7 @@ def parseLine(line, direction):
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
                  
-                message = messageItem(lineToDatetime(line), msgType, msgData)
+                message = messageItem(lineToDatetime(line), msgType, msgData, msgTypeName)
                 pairItem.appendMsgDataList(message)
                 collectMsgTypesInfo(msgTypeName, srcProcess, dstProcess)  
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:

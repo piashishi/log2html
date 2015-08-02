@@ -16,7 +16,6 @@ instanceList[0] = {
     v : "0"
 };
 
-
 function parseNodeInfo(nodeinfoJson) {
     var node_index = 0
     var process_index = 0
@@ -132,19 +131,32 @@ function addMsgTypeCheckBoxes(divID) {
     }
 }
 
-
 function getFilter() {
     var count = $(".srcNode").size();
+    var filter_array = []
     for ( var i = 0; i < count; i++) {
+        var filter = []
         var srcNode = $(".srcNode").eq(i).find("option:selected").text();
         var srcProcess = $(".srcProcess").eq(i).find("option:selected").text();
         var srcInstance = $(".srcInstance").eq(i).find("option:selected").text();
         var dstNode = $(".dstNode").eq(i).find("option:selected").text();
         var dstProcess = $(".dstProcess").eq(i).find("option:selected").text();
         var dstInstance = $(".dstInstance").eq(i).find("option:selected").text();
-        
-        alert(srcNode + srcProcess + srcInstance + dstNode + dstProcess
-                + dstInstance)
-    }
-}
+        var msgType = []
 
+        var msgTypeDiv = $("ul.listID").eq(i).find("input[type='checkbox']").each(function() {
+            if ($(this).is(':checked')) {
+                msgType.push($(this).val())
+            }
+        })
+        filter.push(srcNode)
+        filter.push(srcProcess)
+        filter.push(srcInstance)
+        filter.push(dstNode)
+        filter.push(dstProcess)
+        filter.push(dstInstance)
+        filter.push(msgType)
+        filter_array.push(filter)
+    }
+    return filter_array;
+}

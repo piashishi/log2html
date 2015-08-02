@@ -1,4 +1,8 @@
 import web
+import json
+import urllib
+import genMSC
+import filter
 
 import parseLog
 
@@ -14,8 +18,14 @@ class index:
         return render.index(processInfo, msgTypeInfo)
     
     def POST(self):
-        content = web.data()
-        return content
+#         content = urllib.unquote(web.data())
+        rules =  json.loads(web.data())
+        print rules[0]
+        filter.filterMsg(rules)
+        
+        msc = genMSC.createMSC()
+        print msc
+        return msc
 
 if __name__ == "__main__":
     app = web.application(urls, globals())

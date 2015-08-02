@@ -7,10 +7,10 @@ $def with (processJson, msgType)
 		<script type="text/javascript">
 			jQuery(document).ready(function() {
 				jQuery("#apply").click(function() {
-                    getFilter()
+                    var filter = getFilter()
                     jQuery.ajax({
             	       type : "POST",
-            	       data : "yes",
+            	       data : JSON.stringify(filter),
             	       success : function(data) {
                 	       alert(data)
             	       }

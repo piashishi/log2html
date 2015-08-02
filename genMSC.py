@@ -1,5 +1,6 @@
 #!/usr/bin/python 
 
+import filter
 import parseLog
 
 import datetime
@@ -41,16 +42,6 @@ class MSCItem:
         self.srcLabel = ""
         self.dstLabel = ""
         self.sameMsgCounter = 1
-
-sortedProcessLabel  = []  
- 
-#sort label by process pair.
-def sortProcessLabel():
-    for process in parseLog.processPairNeedProcess:
-        if not process[0] in sortedProcessLabel: 
-            sortedProcessLabel.append(process[0])
-        if not process[1] in sortedProcessLabel:
-            sortedProcessLabel.append(process[1])
             
 def get_msg_key(msg):
     return msg.timestamp
@@ -60,7 +51,7 @@ def get_msg_key(msg):
 #2: generate    MSGLable
 def genMSCLabel():
     index = 0
-    for pair in parseLog.processPairArray:
+    for pair in filter.filterData:
         for data in pair.msgDataList:
             msg = MSCItem(pair, data)
             if not MSGLable.has_key(msg.src):
@@ -73,13 +64,12 @@ def genMSCLabel():
             msg.dstLabel = MSGLable[msg.dst]
             ALLMSG.append(msg)
     ALLMSG.sort(key = get_msg_key)
-    sortProcessLabel()
 
 def printMSCLabel():
     global MSCContent
     maxSize = len(MSGLable)
     index = 1
-    for processLabel in sortedProcessLabel:
+    for processLabel in filter.filterProcesses:
         tmpArr = []
         for key in MSGLable.keys():
             if processLabel in key:
@@ -130,9 +120,7 @@ def printMSCEnd():
     MSCContent += "</mscgen>\n"
     
 
-def genMSC():
-    parseLog.parseNGLog("log")
-    parseLog.generateJsonFile()
+def createMSC():
     genMSCLabel()
     printMSCHeader()
     printMSCLabel()

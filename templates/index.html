@@ -1,9 +1,9 @@
 $def with (processJson, msgType)
 <html>
 	<head>
-		<script src="static/mscgen-inpage.js" defer></script>     
+		<script src="/static/mscgen-inpage.js" defer></script>     
 		<script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
- 		<script type="text/javascript" src="static/genFilter.js"></script>
+ 		<script type="text/javascript" src="/static/genFilter.js"></script>
 		<script type="text/javascript">
 			jQuery(document).ready(function() {
 				jQuery("#apply").click(function() {
@@ -12,7 +12,8 @@ $def with (processJson, msgType)
             	       type : "POST",
             	       data : JSON.stringify(filter),
             	       success : function(data) {
-                	       alert(data)
+                            jQuery(".show_div").empty();  
+                            jQuery(".show_div").prepend(data)
             	       }
         	       })
                })
@@ -83,8 +84,9 @@ $def with (processJson, msgType)
                 </div>
                 <button type="button" id="apply">Apply Filter</button>
             </div>
-  		    <div class="show_div">
-    	   </div>
+            <div class="show_div">
+                
+            </div>
         </div>
     </body>
 </html>

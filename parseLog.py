@@ -40,11 +40,7 @@ def collectProcessesInfo(node, process, processInstance):
 def collectMsgTypesInfo(msgType, srcProcess, dstProcess):        
     if not msgType in msgTypesInfo.keys():
         msgTypesInfo[msgType] = (srcProcess, dstProcess)
-            
-        
-processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"], ["TRACE_PROXY", "SC"]]
-#processPairNeedProcess = [["TRACE_CTRL", "TRACE_PROXY"]]
-   
+              
 month2num = {   'Jan': 1,
                 'Feb': 2,
                 'Mar': 3,
@@ -60,11 +56,12 @@ month2num = {   'Jan': 1,
 
 
 class messageItem:
-    def __init__(self, timestamp, msgType, msgData, msgString):
+    def __init__(self, timestamp, msgType, msgData, msgString, line):
         self.timestamp = timestamp
         self.msgType = msgType
         self.msgString = msgString
         self.msgData = msgData
+        self.line  = line
 
     
 #processPairMessage, store IPC_OUT messages for one process pair(srcProcess->dstProcess)
@@ -81,7 +78,6 @@ class processPair:
         self.dstPid = 0
         self.msgDataList = []
 
-        
     def appendMsgDataList(self, msgItem):
         self.msgDataList.append(msgItem)
     
@@ -133,8 +129,12 @@ def findProcessPair(srcNode, src, srcInstance, dstNode, dst, dstInstance, sender
 def getNodeName(node, num):
     if node == 0:    #0 mean AS_NODE
         return private_data.as_map[num]
+    elif node == 1:
+        return private_data.se_map[num]
     elif node == 2:    #2 mean CLA NODE
         return private_data.cla_map[num]
+    elif node == 3:
+        return private_data.ib_map[num]
     elif node == 4:      #4 SAB
         return private_data.sab_map[num]
     else:
@@ -238,7 +238,7 @@ def parseLine(line, direction):
                     pairItem = processPair(srcNode, srcProcess, srcInstance, dstNode, dstProcess, dstInstance, srcPid)
                     processPairArray.append(pairItem)
                  
-                message = messageItem(lineToDatetime(line), msgType, msgData, msgTypeName)
+                message = messageItem(lineToDatetime(line), msgType, msgData, msgTypeName, line)
                 pairItem.appendMsgDataList(message)
                 collectMsgTypesInfo(msgTypeName, srcProcess, dstProcess)  
             elif msgDirection == direction and direction == "IPC_IN" and pairItem:
@@ -264,6 +264,14 @@ def getALLProcessesInfo():
     for item in processPairArray:
         collectProcessesInfo(item.srcNode, item.src, item.srcInstance)
         collectProcessesInfo(item.dstNode, item.dst, item.dstInstance)
+        
+
+def debugLine():
+    for pair in processPairArray:
+        if pair.dstNode == "CLA-Unknown":
+            for msg in pair.msgDataList:
+                print msg.line
+    
 
 def parseNGLog(directroy):
     parseFiles(directroy, "IPC_OUT")
@@ -272,9 +280,12 @@ def parseNGLog(directroy):
         getALLProcessesInfo()
     msgTypeJson = json.dumps(msgTypesInfo)
     processJson = json.dumps(processesInfo)
+#     debugLine()
     return processJson, msgTypeJson
-    
 
+
+
+parseNGLog("log")
 
 
 

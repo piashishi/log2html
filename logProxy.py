@@ -20,11 +20,8 @@ class index:
     def POST(self):
 #         content = urllib.unquote(web.data())
         rules =  json.loads(web.data())
-        print rules[0]
         filter.filterMsg(rules)
-        
         msc = genMSC.createMSC()
-        print msc
         return msc
 
 if __name__ == "__main__":

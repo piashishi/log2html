@@ -6,28 +6,28 @@ filterData = []
 filterProcesses = []
 
 def filterMsg(rules):
-    print rules
     for rule in rules:
-        print rule
         srcNode = rule[0]
         srcProcess = rule[1]
-        srcInstance = rule[2]
+        srcInstance = int(rule[2])
         dstNode = rule[3]
         dstProcess = rule[4]
-        dstInstance = rule[5]
+        dstInstance = int(rule[5])
         msgType = rule[6]
         
         for pair in parseLog.processPairArray:
-            if pair.src != srcProcess or pair.srcNode != srcNode or \
+            if (pair.src != srcProcess or pair.srcNode != srcNode or \
                 pair.srcInstance != srcInstance or pair.dst != dstProcess or \
-                pair.dstNode != dstNode or pair.dstInstance != dstInstance:
+                pair.dstNode != dstNode or pair.dstInstance != dstInstance ) \
+                and ( \
+                pair.src != dstProcess or pair.srcNode != dstNode or \
+                pair.srcInstance != dstInstance or pair.dst != srcProcess or \
+                pair.dstNode != srcNode or pair.dstInstance != srcInstance ):
                 continue
-            filterData.src = pair.src
-            filterData.srcNode = pair.srcNode
-            filterData.srcInstance = pair.srcInstance
-            filterData.dst = pair.dst
-            filterData.dstNode = pair.dstNode
-            filterData.dstInstance = pair.dstInstance
+            
+            filterPair = parseLog.processPair(pair.srcNode, pair.src, pair.srcInstance, \
+                                                                        pair.dstNode, pair.dst, pair.dstInstance,  pair.srcPid)
+            filterPair.dstPid = pair.dstPid
             
             if srcProcess not in filterProcesses:
                 filterProcesses.append(srcProcess)
@@ -36,6 +36,14 @@ def filterMsg(rules):
             
             for msgData in pair.msgDataList:
                 if msgData.msgString in msgType:
-                    filterData.msgDataList.append(msgData)
+                    filterPair.msgDataList.append(msgData)
+            filterData.append(filterPair)   
+                    
+def  debugErr():
+    for pair in filterData:
+        for lines in pair.msgDataList:
+            print lines.line
+            
+            
                 
     

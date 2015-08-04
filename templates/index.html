@@ -23,7 +23,9 @@ $def with (processJson, msgType)
                     var last_div_nbr = get_last_div_nbr()
                     var new_div_id = 'filter_div_' + (last_div_nbr + 1)
                     new_filter_div.attr('id', new_div_id)
-                    jQuery('.filter').append(new_filter_div)
+
+                    jQuery(new_filter_div).insertAfter('.filterclass')
+
                     jQuery('.del').removeAttr("disabled")
                 })
 

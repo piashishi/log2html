@@ -91,7 +91,7 @@ def printMSCContent():
     index = 0
     if len(ALLMSG) == 0:
         MSCContent += "No match data found"
-        return
+        return MSCContent
     print ALLMSG
     print len(ALLMSG)
     prevMsg = ALLMSG[0]

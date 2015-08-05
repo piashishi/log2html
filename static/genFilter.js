@@ -117,6 +117,7 @@ function addMsgTypeCheckBoxes(divID) {
                     var obj = document.createElement('input');
                     obj.type = "checkbox";
                     obj.value = key
+                    obj.checked = true
                     var li = document.createElement("li");
                     li.appendChild(obj);
                     var msg_span = document.createElement('span');

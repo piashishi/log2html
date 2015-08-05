@@ -121,7 +121,6 @@ def printMSCContent():
         
 def printMSCHeader():
     MSCContent = ""
-    MSCContent += "<mscgen>\n"
     MSCContent += "msc {\n"
 #    MSCContent += "hscale = \"2\";"
     return MSCContent
@@ -129,7 +128,6 @@ def printMSCHeader():
 def printMSCEnd():
     MSCContent = ""
     MSCContent += "}\n"
-    MSCContent += "</mscgen>\n"
     return MSCContent
 
 def clearMSC():

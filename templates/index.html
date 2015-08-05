@@ -1,19 +1,21 @@
 $def with (processJson, msgType)
 <html>
-	<head>
-		<script src="/static/mscgen-inpage.js" defer></script>     
+	<head>  
 		<script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
+        <script src="/static/mscgen-inpage.js" defer></script>   
  		<script type="text/javascript" src="/static/genFilter.js"></script>
 		<script type="text/javascript">
+
+             var MSC = ""
 			jQuery(document).ready(function() {
 				jQuery("#apply").click(function() {
                     var filter = getFilter()
                     jQuery.ajax({
             	       type : "POST",
             	       data : JSON.stringify(filter),
-            	       success : function(data) {
-                            jQuery(".show_div").empty();  
-                            jQuery(".show_div").prepend(data)
+            	       success : function(url) {
+                            jQuery("#show_div").empty(); 
+                            jQuery("#show_div").load(url)
             	       }
         	       })
                })
@@ -89,8 +91,7 @@ $def with (processJson, msgType)
                 </div>
                 <button type="button" id="apply">Apply Filter</button>
             </div>
-            <div class="show_div">
-                
+            <div id="show_div">
             </div>
         </div>
     </body>

@@ -6,7 +6,6 @@ filterData = []
 filterProcesses = []
 
 def checkInstance(rule, value):
-    print rule, value
     if rule == "ALL":
         return True
     if int(rule) == value:
@@ -36,8 +35,8 @@ def filterMsg(rules):
                 checkInstance(dstInstance, pair.srcInstance) and  pair.dst == srcProcess  and \
                 pair.dstNode == srcNode and   checkInstance(srcInstance, pair.dstInstance)):
             
-                filterPair = parseLog.processPair(pair.srcNode, pair.src, pair.srcInstance,  pair.dstNode, pair.dst, pair.dstInstance,  pair.srcPid)
-                filterPair.dstPid = pair.dstPid
+                filterPair = parseLog.processPair(pair.srcNode, pair.src, pair.srcInstance,  pair.srcPid ,\
+                                                                        pair.dstNode, pair.dst, pair.dstInstance,  pair.dstPid)
             
                 if srcProcess not in filterProcesses:
                     filterProcesses.append(srcProcess)
@@ -45,8 +44,6 @@ def filterMsg(rules):
                     filterProcesses.append(dstProcess)
                     
                 for msgData in pair.msgDataList:
-                    print msgType
-                    print msgData.msgString
                     if msgData.msgString in msgType:
                         filterPair.msgDataList.append(msgData)
                 filterData.append(filterPair)   

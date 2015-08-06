@@ -92,11 +92,8 @@ def printMSCContent():
     if len(ALLMSG) == 0:
         MSCContent += "No match data found"
         return MSCContent
-    print ALLMSG
-    print len(ALLMSG)
     prevMsg = ALLMSG[0]
     for msg in ALLMSG:
-        print msg.srcLabel, msg.dstLabel, msg.msgType
         if prevMsg.srcLabel == msg.srcLabel and prevMsg.dstLabel == msg.dstLabel and prevMsg.msgType == msg.msgType:
             if index != 0:
                 #message is same as previous one, 
@@ -143,5 +140,4 @@ def createMSC():
     MSCContent += printMSCLabel()
     MSCContent += printMSCContent()
     MSCContent += printMSCEnd()
-    print MSCContent
     return MSCContent

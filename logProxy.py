@@ -1,6 +1,5 @@
 import web
 import json
-import urllib
 import genMSC
 import filter
 

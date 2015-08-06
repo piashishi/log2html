@@ -15,7 +15,6 @@ msgTypesInfo = {}
 processPairArray = []  # collect all out message, each node is messageItem
 
 def collectProcessesInfo(node, process, processInstance):
-
     if node in processesInfo.keys():
         processFound = False
         processInfoList = processesInfo[node]
@@ -154,12 +153,15 @@ def lineToDatetime(line):
 
     return datetime.datetime(year, month, day, hour, minute, second, microsecond)
 
-def msgTypeToNameAndColor(msgType):
+def getMsgTypeColor(msgType):
     if msgType in private_data.msgTypeDict:
-        return private_data.msgTypeDict[msgType]['name'], private_data.msgTypeDict[msgType]['color']
+        return private_data.msgTypeDict[msgType]['color']
+    return private_data.unknownMsgColor
 
-    return 'unknown_msg(%d)' % msgType, private_data.unknownMsgColor
-
+def getMsgString(msgType):
+    if msgType in private_data.msgTypeDict:
+        return private_data.msgTypeDict[msgType]['name']
+    return 'unknown_msg(%d)' % msgType
    
 def parseLine(line):
     global in_line, out_line
@@ -189,7 +191,7 @@ def parseLine(line):
             srcPid = hexToInt(getSrcPlatform(srcNode), msgData[35], msgData[36])
             dstPid = re.findall(r'\[(\d+)\]', tmpArr[5])[0]  # tmpArr[5] is such as "Session_Ctrl_1[1111]:
             msgType = hexToInt(getMsgTypePlatform(msgDirection, msgInNode), msgData[20], msgData[21])
-            msgTypeName, _ = msgTypeToNameAndColor(msgType)
+            msgTypeString = getMsgString(msgType)
                         
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, srcPid, dstNode, dstProcess, dstInstance, dstPid)
             if msgDirection == "IPC_IN":
@@ -197,9 +199,9 @@ def parseLine(line):
                     pairItem = processPair(srcNode, srcProcess, srcInstance, srcPid, dstNode, dstProcess, dstInstance, dstPid)
                     processPairArray.append(pairItem)
                  
-                message = messageItem(lineToDatetime(line), msgType, msgData, msgTypeName, line)
+                message = messageItem(lineToDatetime(line), msgType, msgData, msgTypeString, line)
                 pairItem.appendMsgDataList(message)
-                collectMsgTypesInfo(msgTypeName, srcProcess, dstProcess)  
+                collectMsgTypesInfo(msgTypeString, srcProcess, dstProcess)  
                 
 def parseFile(fileName):            
     fp = open(fileName, "r");
@@ -218,13 +220,7 @@ def getALLProcessesInfo():
     for item in processPairArray:
         collectProcessesInfo(item.srcNode, item.src, item.srcInstance)
         collectProcessesInfo(item.dstNode, item.dst, item.dstInstance)
-        
-
-def debugLine():
-    for pair in processPairArray:
-            for msg in pair.msgDataList:
-                print msg.line
-    
+            
 
 def parseNGLog(directroy):
     parseFiles(directroy)
@@ -232,7 +228,6 @@ def parseNGLog(directroy):
         getALLProcessesInfo()
     msgTypeJson = json.dumps(msgTypesInfo)
     processJson = json.dumps(processesInfo)
-#     debugLine()
     return processJson, msgTypeJson
 
 

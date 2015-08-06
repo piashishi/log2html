@@ -2,7 +2,6 @@
 
 import filter
 import parseLog
-
 import datetime
 
 
@@ -99,20 +98,23 @@ def printMSCContent():
                 #message is same as previous one, 
                 prevMsg.sameMsgCounter += 1
         else:
-            msgName, msgColor = parseLog.msgTypeToNameAndColor(prevMsg.msgType)
+            msgTypeString = parseLog.getMsgString(prevMsg.msgType)
+            msgColor = parseLog.getMsgTypeColor(prevMsg.msgType)
             if prevMsg.sameMsgCounter != 1:
                 #avoid show too many same messages, the output will show how many times the messages was sent 
                 content = "%s=>%s [ label = \"%s(%d)\", textcolor = \"%s\", linecolor = \"%s\"];\n" %  \
-                    (prevMsg.srcLabel, prevMsg.dstLabel, msgName, prevMsg.sameMsgCounter, msgColor, msgColor)
+                    (prevMsg.srcLabel, prevMsg.dstLabel, msgTypeString, prevMsg.sameMsgCounter, msgColor, msgColor)
             else:
                 content = "%s=>%s [ label = \"%s\", textcolor = \"%s\", linecolor = \"%s\"];\n" % \
-                    (prevMsg.srcLabel, prevMsg.dstLabel, msgName, msgColor, msgColor)
+                    (prevMsg.srcLabel, prevMsg.dstLabel, msgTypeString, msgColor, msgColor)
             MSCContent += content
             prevMsg = msg
         index += 1
-    msgName, msgColor = parseLog.msgTypeToNameAndColor(prevMsg.msgType)
+
+    msgTypeString = parseLog.getMsgString(prevMsg.msgType)
+    msgColor = parseLog.getMsgTypeColor(prevMsg.msgType)
     lastContent ="%s=>%s [ label = \"%s(%d)\", textcolor = \"%s\", linecolor = \"%s\"];\n" %  \
-                    (prevMsg.srcLabel, prevMsg.dstLabel, msgName, prevMsg.sameMsgCounter, msgColor, msgColor)
+                    (prevMsg.srcLabel, prevMsg.dstLabel, msgTypeString, prevMsg.sameMsgCounter, msgColor, msgColor)
     MSCContent += lastContent
     return MSCContent
         

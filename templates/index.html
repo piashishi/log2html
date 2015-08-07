@@ -2,8 +2,12 @@ $def with (processJson, msgType)
 <html>
 	<head>  
 		<script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
-        <script src="/static/mscgen-inpage.js" defer></script>   
- 		<script type="text/javascript" src="/static/genFilter.js"></script>
+		<script type="text/javascript" src="/static/bootstrap-datepicker.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/bootstrap-datepicker.css" />
+		<script type="text/javascript" src="/static/jquery.timePicker.js"></script>   
+		<link rel="stylesheet" type="text/css" href="/static/jquery.timepicker.css" />
+		<script src="/static/mscgen-inpage.js" defer></script>   
+		<script type="text/javascript" src="/static/genFilter.js"></script>
 		<script type="text/javascript">
 
              var MSC = ""
@@ -41,6 +45,22 @@ $def with (processJson, msgType)
                         jQuery(".del").attr('disabled', "disabled")
                     }
                 })
+                
+
+                // time filter
+                jQuery('.start_date').datepicker({'format': 'yyyy-mm-dd', 'autoclose': true});
+                jQuery('.end_date').datepicker({'format': 'yyyy-mm-dd', 'autoclose': true});
+                jQuery('.start_time').timepicker({ 'timeFormat': 'H:i', 'step': 1 });
+                jQuery('.end_time').timepicker({ 'timeFormat': 'H:i' , 'step': 1});
+                
+                optionStr = '';
+                for(var i = 0; i < 60; i++) {
+                    optionStr += "<option value='" + i + "'>" + i + "</option>";
+                }
+                jQuery( 'select[class="start_time_second"]' ).append( optionStr );
+                jQuery( 'select[class="end_time_second"]' ).append( optionStr );
+                jQuery(".end_time_second").val(59);
+
                 
                 function get_last_div() {
                     return jQuery('.filterclass')[jQuery('.filterclass').length - 1]
@@ -84,6 +104,23 @@ $def with (processJson, msgType)
                     <div class="msgType_div">
                         <ul class="listID"></ul>
                     </div>
+<!--                     <div><input type="text" class="time" id="start_time1" data-scroll-default="6:00am" /></div>
+                    <br /> -->
+                    <p>
+                        <input type="text" class="start_date" />
+                        <br />
+                        <input class="start_time" type="text" class="time" />
+                        <br />
+                        <select class='start_time_second'></select>
+                    </p>
+                    <br />
+                    <p>
+                        <input type="text" class="end_date" />
+                        <br />
+                        <input class="end_time" type="text" class="time" />
+                        <br />
+                        <select class='end_time_second'></select>
+                    </p>
                     <div class="button_div">
                         <button type="button" class="del" disabled="disabled">Del</button>
                         <button type="button" class="add">Add</button>

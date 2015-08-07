@@ -143,6 +143,23 @@ function getFilter() {
         var dstNode = $(".dstNode").eq(i).find("option:selected").text();
         var dstProcess = $(".dstProcess").eq(i).find("option:selected").text();
         var dstInstance = $(".dstInstance").eq(i).find("option:selected").text();
+        
+        var start_date = $(".start_date").val();
+        var start_time = $(".start_time").val();
+        var start_time_second = $(".start_time_second").val();
+        
+        var end_date = $(".end_date").val();
+        var end_time = $(".end_time").val();
+        var end_time_second = $(".end_time_second").val();
+
+        console.log('start_date = ' + start_date)
+        console.log('start_time = ' + start_time)
+        console.log('start_time_second = ' + start_time_second)
+        
+        console.log('end_time = ' + end_time)
+        console.log('end_date = ' + end_date)
+        console.log('end_time_second = ' + end_time_second)
+        
         var msgType = []
 
         var msgTypeDiv = $("ul.listID").eq(i).find("input[type='checkbox']").each(function() {
@@ -157,6 +174,15 @@ function getFilter() {
         filter.push(dstProcess)
         filter.push(dstInstance)
         filter.push(msgType)
+        
+        filter.push(start_date)
+        filter.push(start_time)
+        filter.push(start_time_second)
+        
+        filter.push(end_date)
+        filter.push(end_time)
+        filter.push(end_time_second)
+        
         filter_array.push(filter)
     }
     return filter_array;

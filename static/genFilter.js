@@ -151,14 +151,6 @@ function getFilter() {
         var end_date = $(".end_date").val();
         var end_time = $(".end_time").val();
         var end_time_second = $(".end_time_second").val();
-
-        console.log('start_date = ' + start_date)
-        console.log('start_time = ' + start_time)
-        console.log('start_time_second = ' + start_time_second)
-        
-        console.log('end_time = ' + end_time)
-        console.log('end_date = ' + end_date)
-        console.log('end_time_second = ' + end_time_second)
         
         var msgType = []
 

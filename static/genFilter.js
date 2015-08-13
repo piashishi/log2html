@@ -132,6 +132,12 @@ function addMsgTypeCheckBoxes(divID) {
     }
 }
 
+function addOptions(selectName, OptionList) {
+    for ( var i = 0; i < OptionList.length; i++) {
+        $(selectName).append($('<option>', {value:OptionList[i], text:OptionList[i]}));
+    }
+}
+
 function getFilter() {
     var count = $(".srcNode").size();
     var filter_array = []
@@ -144,13 +150,11 @@ function getFilter() {
         var dstProcess = $(".dstProcess").eq(i).find("option:selected").text();
         var dstInstance = $(".dstInstance").eq(i).find("option:selected").text();
         
-        var start_date = $(".start_date").val();
-        var start_time = $(".start_time").val();
-        var start_time_second = $(".start_time_second").val();
+        var start_date = $("#start_date").val();
+        var start_time = $("#start_time").val();
         
-        var end_date = $(".end_date").val();
-        var end_time = $(".end_time").val();
-        var end_time_second = $(".end_time_second").val();
+        var end_date = $("#end_date").val();
+        var end_time = $("#end_time").val();
         
         var msgType = []
 
@@ -169,11 +173,9 @@ function getFilter() {
         
         filter.push(start_date)
         filter.push(start_time)
-        filter.push(start_time_second)
         
         filter.push(end_date)
         filter.push(end_time)
-        filter.push(end_time_second)
         
         filter_array.push(filter)
     }

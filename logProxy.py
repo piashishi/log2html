@@ -21,8 +21,8 @@ class show:
         
 class index:
     def GET(self):
-        processInfo, msgTypeInfo = parseLog.parseNGLog("log")
-        return render.index(processInfo, msgTypeInfo)
+        processInfo, msgTypeInfo, avaiableDates, avaiableTimes = parseLog.parseNGLog("log")
+        return render.index(processInfo, msgTypeInfo, avaiableDates, avaiableTimes)
     
     def POST(self):
         global MSC

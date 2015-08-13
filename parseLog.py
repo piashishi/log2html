@@ -11,6 +11,11 @@ import private_data
 processesInfo = {}
 # msgTypesInfo : key: msgType, value: (srcProcess, dstProcess)
 msgTypesInfo = {}
+# availableDates : key: date_string(eg. 2015-8-13), value: True
+availableDates = {}
+# availableTimes : key: time_string(eg. 01:02:03), value: True
+availableTimes = {}
+
 
 processPairArray = []  # collect all out message, each node is messageItem
 
@@ -192,6 +197,9 @@ def parseLine(line):
             dstPid = re.findall(r'\[(\d+)\]', tmpArr[5])[0]  # tmpArr[5] is such as "Session_Ctrl_1[1111]:
             msgType = hexToInt(getMsgTypePlatform(msgDirection, msgInNode), msgData[20], msgData[21])
             msgTypeString = getMsgString(msgType)
+            msgDateTime = lineToDatetime(line)
+            availableDates[msgDateTime.date().isoformat()] = True
+            availableTimes[msgDateTime.time().strftime("%H:%M.%S")] = True
                         
             pairItem = findProcessPair(srcNode, srcProcess, srcInstance, srcPid, dstNode, dstProcess, dstInstance, dstPid)
             if msgDirection == "IPC_IN":
@@ -199,7 +207,7 @@ def parseLine(line):
                     pairItem = processPair(srcNode, srcProcess, srcInstance, srcPid, dstNode, dstProcess, dstInstance, dstPid)
                     processPairArray.append(pairItem)
                  
-                message = messageItem(lineToDatetime(line), msgType, msgData, msgTypeString, line)
+                message = messageItem(msgDateTime, msgType, msgData, msgTypeString, line)
                 pairItem.appendMsgDataList(message)
                 collectMsgTypesInfo(msgTypeString, srcProcess, dstProcess)  
                 
@@ -226,9 +234,13 @@ def parseNGLog(directroy):
     parseFiles(directroy)
     if len(processPairArray) != 0:
         getALLProcessesInfo()
-    msgTypeJson = json.dumps(msgTypesInfo)
+
     processJson = json.dumps(processesInfo)
-    return processJson, msgTypeJson
+    msgTypeJson = json.dumps(msgTypesInfo)
+    datesJson = json.dumps(sorted(availableDates.keys()))
+    timesJson = json.dumps(sorted(availableTimes.keys()))
+    
+    return processJson, msgTypeJson, datesJson, timesJson
 
 
 

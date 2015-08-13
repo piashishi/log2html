@@ -19,17 +19,8 @@ input.start_date {
 
 input.start_time {
 	width:50px; 
-    position:relative;
-    left:40px
-}
-
-select.start_time_second {
-	width:50px; 
 	float:left;
-	position:relative;
-	left:150px
 }
-
 
 input.end_date {
 	width:80px; 
@@ -38,15 +29,7 @@ input.end_date {
 
 input.end_time {
 	width:50px; 
-    position:relative;
-    left:40px
-}
-
-select.end_time_second {
-	width:50px; 
 	float:left;
-	position:relative;
-	left:150px
 }
 
 #show_div {

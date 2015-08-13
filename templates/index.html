@@ -1,29 +1,25 @@
-$def with (processJson, msgType)
+$def with (processJson, msgType, avaiableDates, avaiableTimes)
 <html>
-	<head>  
-		<script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
-		<script type="text/javascript" src="/static/bootstrap-datepicker.js"></script>
-		<link rel="stylesheet" type="text/css" href="/static/bootstrap-datepicker.css" />
-		<script type="text/javascript" src="/static/jquery.timePicker.js"></script>   
-		<link rel="stylesheet" type="text/css" href="/static/jquery.timepicker.css" />
-		<script src="/static/mscgen-inpage.js" defer></script>   
-		<script type="text/javascript" src="/static/genFilter.js"></script>
-		<script type="text/javascript">
+    <head>  
+        <script type="text/javascript" src="/static/jquery-1.11.3.min.js"></script>   
+        <script src="/static/mscgen-inpage.js" defer></script>   
+        <script type="text/javascript" src="/static/genFilter.js"></script>
+        <script type="text/javascript">
 
              var MSC = ""
-			jQuery(document).ready(function() {
-				jQuery("#apply").click(function() {
+            jQuery(document).ready(function() {
+                jQuery("#apply").click(function() {
                     var filter = getFilter()
                     jQuery.ajax({
-            	       type : "POST",
-            	       data : JSON.stringify(filter),
-            	       success : function(url) {
+                       type : "POST",
+                       data : JSON.stringify(filter),
+                       success : function(url) {
                             jQuery("#show_div").empty(); 
                             jQuery("#show_div").load(url)
-            	       }
-        	       })
+                       }
+                   })
                })
-    		
+            
 
                 jQuery(".add").click(function(){
                     var new_filter_div =  reserved_filter_div.clone(true)
@@ -46,21 +42,21 @@ $def with (processJson, msgType)
                     }
                 })
                 
-
                 // time filter
-                jQuery('.start_date').datepicker({'format': 'yyyy-mm-dd', 'autoclose': true});
-                jQuery('.end_date').datepicker({'format': 'yyyy-mm-dd', 'autoclose': true});
-                jQuery('.start_time').timepicker({ 'timeFormat': 'H:i', 'step': 1 });
-                jQuery('.end_time').timepicker({ 'timeFormat': 'H:i' , 'step': 1});
-                
-                optionStr = '';
-                for(var i = 0; i < 60; i++) {
-                    optionStr += "<option value='" + i + "'>" + i + "</option>";
-                }
-                jQuery( 'select[class="start_time_second"]' ).append( optionStr );
-                jQuery( 'select[class="end_time_second"]' ).append( optionStr );
-                jQuery(".end_time_second").val(59);
 
+                var avaiableDates = $:avaiableDates
+                addOptions("#start_date", avaiableDates)
+                jQuery("#start_date").val(jQuery("#start_date option:first").val());
+
+                addOptions("#end_date", avaiableDates)
+                jQuery("#end_date").val(jQuery("#end_date option:last").val());
+
+                var avaiableTimes = $:avaiableTimes
+                addOptions("#start_time", avaiableTimes)
+                jQuery("#start_time").val(jQuery("#start_time option:first").val());
+
+                addOptions("#end_time", avaiableTimes)
+                jQuery("#end_time").val(jQuery("#end_time option:last").val());
                 
                 function get_last_div() {
                     return jQuery('.filterclass')[jQuery('.filterclass').length - 1]
@@ -85,6 +81,16 @@ $def with (processJson, msgType)
     </head>
     <body>
         <div class="main_div">
+            <div class="start_time_filter">
+                <select id="start_date"></select>
+                <select id="start_time"></select>                
+            </div>
+            to
+            <div class="end_time_filter">
+                <select id="end_date"></select>
+                <select id="end_time"></select>
+            </div>
+            <br/>
             <div class="filter">
                 <div class="filterclass" id="filter_div_0">
                     <p>From/To</p>
@@ -92,7 +98,7 @@ $def with (processJson, msgType)
                     </select>
                     <select class="srcProcess" onchange="addInstanceOptions(this.value, this)">
                     </select>
-                    <select class="srcInstance" >
+                    <select class="srcInstance">
                     </select>
                     <p>To/From</p>
                     <select class="dstNode" onchange="addProcessOptions(this.value, this)">
@@ -106,17 +112,6 @@ $def with (processJson, msgType)
                     </div>
 <!--                     <div><input type="text" class="time" id="start_time1" data-scroll-default="6:00am" /></div>
                     <br /> -->
-                    <div class="start_time_filter">
-                        <input type="text" class="start_date"/>
-                        <input class="start_time" type="text" class="time" />
-                        <select class='start_time_second'></select>                    
-                    </div>
-                    <br />
-                    <div class="end_time_filter">
-                        <input type="text" class="end_date" />
-                        <input class="end_time" type="text" class="time" />
-                        <select class='end_time_second'></select>
-                    </div>
                     <div class="button_div">
                         <button type="button" class="del" disabled="disabled">Del</button>
                         <button type="button" class="add">Add</button>

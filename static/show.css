@@ -2,11 +2,18 @@ div.main_div {
 	width:1600px;
 }
 div.filter {
- 	width:400px;
+	width:400px;
 	float:left;
 }
 
 div.filterclass {
+	border-bottom :1px dashed gray;
+	border-right :2px solid gray;
+	padding-bottom:25px;
+}
+
+div.time_filter {
+	width:400px;
 	border-bottom :1px dashed gray;
 	border-right :2px solid gray;
 	padding-bottom:25px;
